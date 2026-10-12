@@ -1,0 +1,27 @@
+========= COMPUTE-SANITIZER
+M=16 K=37 F=1 nnz=235 convert_cpu_ms=0.02495 row_ms=0.0878432 relative_rmse_tf32=1.02621e-07
+M=16 K=37 F=17 nnz=235 convert_cpu_ms=0.027917 row_ms=0.123578 relative_rmse_tf32=9.88293e-08
+M=16 K=37 F=32 nnz=235 convert_cpu_ms=0.027702 row_ms=0.141101 relative_rmse_tf32=9.91869e-08
+M=16 K=37 F=64 nnz=235 convert_cpu_ms=0.027427 row_ms=0.142621 relative_rmse_tf32=9.55615e-08 acc_row_ms=0.140365
+M=16 K=37 F=100 nnz=235 convert_cpu_ms=0.03317 row_ms=0.145914 relative_rmse_tf32=9.67805e-08
+M=16 K=37 F=128 nnz=235 convert_cpu_ms=0.029482 row_ms=0.150413 relative_rmse_tf32=9.32743e-08 acc_row_ms=0.148963
+M=16 K=37 F=256 nnz=235 convert_cpu_ms=0.030876 row_ms=0.174765 relative_rmse_tf32=9.64399e-08 acc_row_ms=0.171904
+M=16 K=37 F=512 nnz=235 convert_cpu_ms=0.034927 row_ms=0.224803 relative_rmse_tf32=9.52535e-08 acc_row_ms=0.222973
+M=16 K=37 F=513 nnz=235 convert_cpu_ms=0.026284 row_ms=0.219885 relative_rmse_tf32=9.55629e-08
+M=16 K=37 F=544 nnz=235 convert_cpu_ms=0.026339 row_ms=0.218144 relative_rmse_tf32=9.74721e-08
+M=16 K=37 F=1024 nnz=235 convert_cpu_ms=0.026235 row_ms=0.22456 relative_rmse_tf32=9.53542e-08
+M=19 K=37 F=1 nnz=276 convert_cpu_ms=0.042236 row_ms=0.0885472 relative_rmse_tf32=9.7887e-08
+M=19 K=37 F=17 nnz=276 convert_cpu_ms=0.041729 row_ms=0.124314 relative_rmse_tf32=9.40154e-08
+M=19 K=37 F=32 nnz=276 convert_cpu_ms=0.039674 row_ms=0.1416 relative_rmse_tf32=9.49056e-08
+M=19 K=37 F=64 nnz=276 convert_cpu_ms=0.039242 row_ms=0.143526 relative_rmse_tf32=9.30082e-08 acc_row_ms=0.142035
+M=19 K=37 F=100 nnz=276 convert_cpu_ms=0.057828 row_ms=0.148077 relative_rmse_tf32=9.2325e-08
+M=19 K=37 F=128 nnz=276 convert_cpu_ms=0.054212 row_ms=0.150198 relative_rmse_tf32=9.12206e-08 acc_row_ms=0.14984
+M=19 K=37 F=256 nnz=276 convert_cpu_ms=0.06087 row_ms=0.173366 relative_rmse_tf32=9.26147e-08 acc_row_ms=0.173648
+M=19 K=37 F=512 nnz=276 convert_cpu_ms=0.055444 row_ms=0.222586 relative_rmse_tf32=9.25925e-08 acc_row_ms=0.224608
+M=19 K=37 F=513 nnz=276 convert_cpu_ms=0.047167 row_ms=0.222547 relative_rmse_tf32=9.12986e-08
+M=19 K=37 F=544 nnz=276 convert_cpu_ms=0.044439 row_ms=0.22007 relative_rmse_tf32=9.32705e-08
+M=19 K=37 F=1024 nnz=276 convert_cpu_ms=0.045182 row_ms=0.221059 relative_rmse_tf32=9.20764e-08
+M=17 K=3 F=100 nnz=1 convert_cpu_ms=0.003914 row_ms=0.0460416 relative_rmse_tf32=0
+M=9 K=3 F=100 nnz=0 convert_cpu_ms=0.000742 row_ms=0.0412768 relative_rmse_tf32=0
+All native correctness tests passed.
+========= ERROR SUMMARY: 0 errors

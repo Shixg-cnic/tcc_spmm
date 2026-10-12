@@ -1,0 +1,10 @@
+/build*/
+/data/
+/third_party/Acc-SpMM/dataset/
+
+*.o
+*.a
+*.so
+*.bin
+__pycache__/
+*.pyc

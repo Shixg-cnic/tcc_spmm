@@ -131,6 +131,9 @@ __global__ void rowSpmmKernel(
         fragB01[3] = loadFeature<Bounds>(d_MatB + sourceIdx1 + COL_WINDOW_R, colB13 + COL_WINDOW_R, feature_dim);
     }
 
+    // All warps must finish reading the first mapping before the first
+    // iteration reuses that mapping buffer for tile 2's cp.async prefetch.
+    __syncthreads();
     /* === main loop === */
     for(vint tc_block = start_blk_idx + 1; tc_block < end_blk_idx; ++tc_block) {
         vint sel_shm       =   ((tc_block - start_blk_idx + 1) & 1) << 6;   // 0->iter1

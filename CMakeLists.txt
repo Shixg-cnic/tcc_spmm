@@ -20,7 +20,12 @@ if(NOT CUSPARSE_INCLUDE_DIR OR NOT CUBLAS_INCLUDE_DIR)
 endif()
 add_library(tcc_spmm STATIC
     src/format/row_convert.cpp
-    src/kernel/row_spmm.cu)
+    src/kernel/row_spmm.cu
+    src/format/column_convert.cpp
+    src/kernel/column_spmm.cu)
+set(TCC_SW_SIZE 16 CACHE STRING "Default Column SuperWindow size")
+set(TCC_CACHE_SIZE 32 CACHE STRING "Column cached rows per SuperWindow")
+target_compile_definitions(tcc_spmm PUBLIC TCC_SW_SIZE=${TCC_SW_SIZE} TCC_CACHE_SIZE=${TCC_CACHE_SIZE})
 target_include_directories(tcc_spmm PUBLIC include)
 target_compile_options(tcc_spmm PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-O3>
     $<$<COMPILE_LANGUAGE:CUDA>:-O3;--ptxas-options=-v>)
@@ -32,3 +37,10 @@ target_compile_options(row_spmm_test PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-O3>)
 target_link_libraries(row_spmm_test PRIVATE tcc_spmm)
 enable_testing()
 add_test(NAME row_spmm_correctness COMMAND row_spmm_test)
+add_executable(column_spmm_test tests/column_spmm_test.cu)
+target_compile_options(column_spmm_test PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-O3>)
+target_link_libraries(column_spmm_test PRIVATE tcc_spmm)
+add_test(NAME column_spmm_correctness COMMAND column_spmm_test)
+add_executable(compare_row_column tests/compare_row_column.cu)
+target_compile_options(compare_row_column PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-O3>)
+target_link_libraries(compare_row_column PRIVATE tcc_spmm)

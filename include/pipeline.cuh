@@ -7,18 +7,18 @@ void wait_group() {
     asm volatile(
         "cp.async.commit_group;\n"
         "cp.async.wait_group 0;\n"
-        ::
+        ::: "memory"
     );
 }
 
 __device__ __forceinline__
 void async_copy (std::uint32_t shared_addr, const float* val) {
-    asm volatile("cp.async.ca.shared.global [%0], [%1], 4;\n" :: "r"(shared_addr), "l"(val));
+    asm volatile("cp.async.ca.shared.global [%0], [%1], 4;\n" :: "r"(shared_addr), "l"(val) : "memory");
 }
 
 __device__ __forceinline__
 void async_copy_idx (std::uint32_t shared_addr, const std::uint32_t* val) {
-    asm volatile("cp.async.ca.shared.global [%0], [%1], 4;\n" :: "r"(shared_addr), "l"(val));
+    asm volatile("cp.async.ca.shared.global [%0], [%1], 4;\n" :: "r"(shared_addr), "l"(val) : "memory");
 }
 
 __device__ __forceinline__

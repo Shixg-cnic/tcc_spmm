@@ -1,0 +1,20 @@
+sm_120 SASS audit: cuobjdump --dump-sass build/libtcc_spmm.a
+Counts below are static instruction sites, not runtime hardware counters.
+C3: HMMA.1688.F32.TF32=2, async LDGSTS=2, global REDG.E.ADD.F32=9
+/*12c0*/                   LDGSTS.E [R39], desc[UR14][R22.64] ;                              /* 0x0000000016277fae */
+/*1370*/                   LDGSTS.E [R35], desc[UR14][R32.64] ;                              /* 0x0000000020237fae */
+/*1760*/                   HMMA.1688.F32.TF32 R20, R12, R34, RZ ;                            /* 0x000000220c14723c */
+/*1fe0*/                   HMMA.1688.F32.TF32 R20, R16, R20, RZ ;                            /* 0x000000141014723c */
+C2: HMMA.1688.F32.TF32=2, async LDGSTS=2, global REDG.E.ADD.F32=8
+/*0fe0*/                   LDGSTS.E [R33], desc[UR14][R18.64] ;                              /* 0x0000000012217fae */
+/*1090*/                   LDGSTS.E [R17], desc[UR14][R42.64] ;                              /* 0x000000002a117fae */
+/*1480*/                   HMMA.1688.F32.TF32 R16, R12, R32, RZ ;                            /* 0x000000200c10723c */
+/*1a10*/                   HMMA.1688.F32.TF32 R12, R8, R32, RZ ;                             /* 0x00000020080c723c */
+C1: HMMA.1688.F32.TF32=2, async LDGSTS=2, global REDG.E.ADD.F32=8
+/*0b90*/                   LDGSTS.E [R19], desc[UR10][R6.64] ;                               /* 0x0000000006137fae */
+/*0c40*/                   LDGSTS.E [R7], desc[UR10][R22.64] ;                               /* 0x0000000016077fae */
+/*0e80*/                   HMMA.1688.F32.TF32 R16, R8, R28, RZ ;                             /* 0x0000001c0810723c */
+/*1440*/                   HMMA.1688.F32.TF32 R16, R12, R16, RZ ;                            /* 0x000000100c10723c */
+C0: HMMA.1688.F32.TF32=2, async LDGSTS=0, global REDG.E.ADD.F32=8
+/*0a10*/                   HMMA.1688.F32.TF32 R12, R8, R26, RZ ;                             /* 0x0000001a080c723c */
+/*1000*/                   HMMA.1688.F32.TF32 R8, R16, R26, RZ ;                             /* 0x0000001a1008723c */

@@ -20,9 +20,14 @@ Column-SWTCF 将连续 8 个输入列分组，按原始目标行编号压缩为 
 ```text
 tcc_spmm/
 ├── CMakeLists.txt
-├── include/                  # 格式、MMA、流水线声明
+├── include/                  # 公共 CSR、Row/Column 格式、MMA、流水线声明
+│   ├── csr.cuh               # CanonicalCSR 公共定义（Row/Column 共享）
+│   ├── row_format.cuh
+│   ├── column_format.cuh
+│   ├── mma_tf32.cuh
+│   └── pipeline.cuh
 ├── src/
-│   ├── format/               # Row / Column CPU 转换
+│   ├── format/               # csr / Row / Column CPU 转换
 │   └── kernel/               # Row / Column FP32 Tensor Core 算子
 ├── tests/
 │   ├── row_spmm_test.cu       # 原生正确性与计时入口
@@ -32,8 +37,10 @@ tcc_spmm/
 │   ├── matrix_io.cuh
 │   ├── acc_reference.cuh
 │   └── acc_reference.cu      # 原始 Acc Row 对照
+├── bench/
+│   └── benchmark_fp32.cu     # 统一 FP32 基线：Acc 原始 + Row + C0–C3
 ├── third_party/Acc-SpMM/     # 原始源码与 License
-└── results/                 # 实测报告及原始记录
+└── results/                 # 实测报告及原始记录（baseline/adaptive/int4）
 ```
 
 ## 构建与运行
@@ -62,6 +69,11 @@ make -j
 ./compare_row_column matrix.mtx all 30 0
 ./compare_row_column matrix.mtx 128 30 0 X.bin
 
+# 统一 FP32 基线：Acc 原始 tf32_mma_kernel + Row + C0/C1/C2/C3
+# all 包含 F=32/64/100/128/256/512；groups>=3 组独立 Graph 测量
+./benchmark_fp32 matrix.csr all 3 0 X.bin
+./benchmark_fp32 matrix.csr 128 3 0 X.bin
+
 # 内存和共享内存竞争检查
 compute-sanitizer --tool memcheck --error-exitcode 9 ./column_spmm_test
 compute-sanitizer --tool racecheck --error-exitcode 9 ./column_spmm_test
@@ -72,19 +84,19 @@ Column 默认参数可通过 `cmake .. -DTCC_SW_SIZE=16 -DTCC_CACHE_SIZE=32` 编
 
 未提供 X 时生成固定种子的随机 FP32 特征。MatrixMarket 支持 coordinate real/integer/pattern，general 或 symmetric；保留权重，不自动加反向边或自环。
 
-生成 `build/libtcc_spmm.a` 和三个原生测试程序，默认架构为 `sm_120`。CMake 自动查找 CUDA 及原始 Acc 所需的 cuSPARSE/cuBLAS 头文件，不运行 Python。
+生成 `build/libtcc_spmm.a` 和四个原生程序（三个测试 + 一个基准），默认架构为 `sm_120`。CMake 自动查找 CUDA 及原始 Acc 所需的 cuSPARSE/cuBLAS 头文件，不运行 Python。
 
 ## C++ 接口与验证
 
-`include/row_format.cuh` 提供 `canonicalCSR(...)`、`convertRow(...)`、`launchRowSpMM(...)`。调用方负责格式数组、X、Y 的显存分配与传输，并传入 CUDA stream。工程没有 Python、PyTorch 或 ctypes 调用层。
-
-`include/column_format.cuh` 提供 `convertColumn(...)`、GPU 数组视图 `DeviceColumnSWTCF`、`launchColumnSpMM(...)` 和资源查询。转换输入必须是 `canonicalCSR(...)` 的输出。上传各数组并填充 GPU 视图后，调用：
+`include/csr.cuh` 提供公共 `CanonicalCSR` 与 `canonicalCSR(...)`；`include/row_format.cuh` 提供 `convertRow(...)`、`launchRowSpMM(...)`；`include/column_format.cuh` 提供 `convertColumn(...)`、GPU 数组视图 `DeviceColumnSWTCF`、`launchColumnSpMM(...)` 和资源查询。调用方负责格式数组、X、Y 的显存分配与传输，并传入 CUDA stream。工程没有 Python、PyTorch 或 ctypes 调用层。
 
 ```cpp
 launchColumnSpMM(deviceColumn, deviceX, deviceY, F, ColumnVersion::C3, stream);
 ```
 
 默认调用包含同 Stream 上的 `cudaMemsetAsync(Y)`，可直接捕获进 CUDA Graph。仅在已经清零 Y 时使用末尾参数 `clearOutput=false`。GPU 指针由调用者管理，X 与 Y 不得重叠。
+
+`benchmark_fp32` 直接调用原始 Acc `tf32_mma_kernel`（未修改源码），要求与 Column 相同的 CSR/X/F/GPU/stream。Acc 原始 kernel 的已知限制：F 必须在 [64,512] 且 F%32==0；行数填充到 8 的倍数；不支持空 8 行窗口（本仓库两个全图均无空窗口）。这些限制只影响 Acc 对照列，本地 Row/Column 无此限制。计时统一使用 CUDA Graph + Event：Column 的 complete 包含 Y 清零，isolated kernel 与 complete 在同一 Graph 内用外部事件计时，避免测量序列不同导致的时钟状态差异。
 
 `compare_row_column` 同时支持 MatrixMarket 和原生 CSR 二进制文件：8 字节 `TCCCSR1\0`，三个 little-endian uint32（M、K、nnz），然后依次是 uint32 `ptr[M+1]`、uint32 `src[nnz]`、FP32 `values[nnz]`。读取后合并重复坐标。可选 X 文件是 row-major FP32 `[K,sourceF]`；F 较小时截取，F 较大时循环扩展原特征。数据放在被 Git 忽略的 `data/` 下。
 
@@ -95,3 +107,5 @@ launchColumnSpMM(deviceColumn, deviceX, deviceY, F, ColumnVersion::C3, stream);
 此前通过 Python 测得的完整 arxiv 和区域结果保留在 [历史报告](results/row_fp32.md)，并非当前原生入口重新计时的结果。原始源码版本 `4fe8d04ae351a97a9e2a37c6cec7afb253b814ce`，MIT License 保留，第三方示例数据不纳入版本控制。来源：[官方实现](https://github.com/Hyaloid/AccSpMM)、[论文](https://arxiv.org/abs/2501.09251)。
 
 第二阶段实现及同输入数据见 [Column FP32 报告](results/column_fp32.md)。该阶段发现并修复了 Row 首次映射缓冲的跨 Warp 竞争，新增一次计算前同步；第三方源码保持原样，历史 Row 数据保留。下一阶段再设计融合反量化。
+
+第三阶段基线（Acc 原始 + Row + C0–C3 统一计时）见 [results/baseline/baseline_fp32.md](results/baseline/baseline_fp32.md)。

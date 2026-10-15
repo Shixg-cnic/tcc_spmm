@@ -1,5 +1,5 @@
 #pragma once
-#include "row_format.cuh"
+#include "csr.cuh"
 
 #ifndef TCC_SW_SIZE
 #define TCC_SW_SIZE 16

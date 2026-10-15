@@ -1,5 +1,6 @@
 #pragma once
 #include "column_format.cuh"
+#include "row_format.cuh"
 #include <algorithm>
 #include <chrono>
 #include <cmath>

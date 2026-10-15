@@ -1,7 +1,5 @@
 #pragma once
-#include <cuda_runtime.h>
-#include <cstdint>
-#include <vector>
+#include "csr.cuh"
 
 struct RowBitTCF {
     std::uint32_t rows, cols;
@@ -10,13 +8,6 @@ struct RowBitTCF {
     std::vector<float> values;
 };
 
-struct CanonicalCSR {
-    std::vector<std::uint32_t> ptr{0}, src;
-    std::vector<float> values;
-};
-
-CanonicalCSR canonicalCSR(std::uint32_t rows, std::uint32_t cols, std::uint32_t nnz,
-    const std::uint32_t* ptr, const std::uint32_t* src, const float* values);
 RowBitTCF convertRow(std::uint32_t rows, std::uint32_t cols, const CanonicalCSR& csr);
 
 cudaError_t launchRowSpMM(const std::uint32_t* window, const std::uint32_t* offset,

@@ -19,6 +19,7 @@ if(NOT CUSPARSE_INCLUDE_DIR OR NOT CUBLAS_INCLUDE_DIR)
     message(FATAL_ERROR "cuSPARSE and cuBLAS headers are required by the original Acc reference")
 endif()
 add_library(tcc_spmm STATIC
+    src/format/csr.cpp
     src/format/row_convert.cpp
     src/kernel/row_spmm.cu
     src/format/column_convert.cpp
@@ -44,3 +45,9 @@ add_test(NAME column_spmm_correctness COMMAND column_spmm_test)
 add_executable(compare_row_column tests/compare_row_column.cu)
 target_compile_options(compare_row_column PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-O3>)
 target_link_libraries(compare_row_column PRIVATE tcc_spmm)
+
+# Unified FP32 baseline benchmark: original Acc kernel + Row + Column C0..C3.
+add_executable(benchmark_fp32 bench/benchmark_fp32.cu tests/acc_reference.cu)
+target_include_directories(benchmark_fp32 PRIVATE ${CUSPARSE_INCLUDE_DIR} ${CUBLAS_INCLUDE_DIR} ${CMAKE_SOURCE_DIR}/tests)
+target_compile_options(benchmark_fp32 PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-O3>)
+target_link_libraries(benchmark_fp32 PRIVATE tcc_spmm)

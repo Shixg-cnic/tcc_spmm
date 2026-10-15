@@ -51,3 +51,15 @@ add_executable(benchmark_fp32 bench/benchmark_fp32.cu tests/acc_reference.cu)
 target_include_directories(benchmark_fp32 PRIVATE ${CUSPARSE_INCLUDE_DIR} ${CUBLAS_INCLUDE_DIR} ${CMAKE_SOURCE_DIR}/tests)
 target_compile_options(benchmark_fp32 PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-O3>)
 target_link_libraries(benchmark_fp32 PRIVATE tcc_spmm)
+
+# Offline Column-SWTCF structural analysis (atomic/workload statistics).
+add_executable(analyze_structure bench/analyze_structure.cu)
+target_include_directories(analyze_structure PRIVATE ${CMAKE_SOURCE_DIR}/tests)
+target_compile_options(analyze_structure PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-O3>)
+target_link_libraries(analyze_structure PRIVATE tcc_spmm)
+
+# Diagnostic: C0 flow without global atomics, to isolate the atomic output cost.
+add_executable(atomic_probe bench/atomic_probe.cu)
+target_include_directories(atomic_probe PRIVATE ${CMAKE_SOURCE_DIR}/tests)
+target_compile_options(atomic_probe PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-O3>)
+target_link_libraries(atomic_probe PRIVATE tcc_spmm)

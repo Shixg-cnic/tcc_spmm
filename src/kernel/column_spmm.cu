@@ -8,6 +8,10 @@
 namespace {
 using U = std::uint32_t;
 constexpr int WARPS = COLUMN_FEATURE_TILE/32;
+// C3 output cache row stride: pad 4 floats after every row so that lanes
+// writing the same feature of different rows hit different shared-memory
+// banks (128 floats per row would alias every row onto the same bank).
+constexpr U COLUMN_CACHE_STRIDE = COLUMN_FEATURE_TILE + 4;
 
 __device__ void loadX(const float* x, U w, U cols, U f, U features, float b[2][4]) {
     U lane=threadIdx.x%32, group=lane/4, k=lane%4;
@@ -65,7 +69,8 @@ __global__ void columnKernel(DeviceColumnSWTCF m, const float* x, float* y, U fe
     U blockFeature=blockIdx.y*COLUMN_FEATURE_TILE;
     U fBase=blockFeature+(threadIdx.x/32)*32;
     if constexpr(Version==3) {
-        for(U i=threadIdx.x;i<COLUMN_CACHE_SIZE*COLUMN_FEATURE_TILE;i+=blockDim.x) cache[i]=0.f;
+        for(U i=threadIdx.x;i<COLUMN_CACHE_SIZE*COLUMN_FEATURE_TILE;i+=blockDim.x)
+            cache[(i/COLUMN_FEATURE_TILE)*COLUMN_CACHE_STRIDE+i%COLUMN_FEATURE_TILE]=0.f;
         __syncthreads();
     }
     float b[2][4],nextX[2][4];
@@ -105,7 +110,7 @@ __global__ void columnKernel(DeviceColumnSWTCF m, const float* x, float* y, U fe
                         if constexpr(Version==3) {
                             U cached=m.superWindowRowCacheSlot[rowBase+slot];
                             if(cached!=UINT32_MAX) {
-                                cache[cached*COLUMN_FEATURE_TILE+feature-blockFeature]+=c[i];
+                                cache[cached*COLUMN_CACHE_STRIDE+(feature-blockFeature)]+=c[i];
                                 continue;
                             }
                         }
@@ -126,7 +131,8 @@ __global__ void columnKernel(DeviceColumnSWTCF m, const float* x, float* y, U fe
             if(feature<features) {
                 U slot=m.superWindowCachedRowSlot[std::size_t(sw)*COLUMN_CACHE_SIZE+i/COLUMN_FEATURE_TILE];
                 U row=m.superWindowRows[rowBase+slot];
-                atomicAdd(y+std::size_t(row)*features+feature,cache[i]);
+                atomicAdd(y+std::size_t(row)*features+feature,
+                    cache[(i/COLUMN_FEATURE_TILE)*COLUMN_CACHE_STRIDE+i%COLUMN_FEATURE_TILE]);
             }
         }
     }
@@ -141,7 +147,7 @@ const void* kernelPointer(ColumnVersion version) {
     }
     return nullptr;
 }
-constexpr std::size_t CACHE_BYTES=std::size_t(COLUMN_CACHE_SIZE)*COLUMN_FEATURE_TILE*sizeof(float);
+constexpr std::size_t CACHE_BYTES=std::size_t(COLUMN_CACHE_SIZE)*COLUMN_CACHE_STRIDE*sizeof(float);
 
 }
 

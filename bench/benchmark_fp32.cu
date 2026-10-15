@@ -126,25 +126,34 @@ std::size_t columnBytes(const ColumnSWTCF& m) {
                 m.superWindowCachedRowSlot.size() + m.superWindowCachedCount.size()) +
            8 * m.tileLocalBit.size();
 }
+// Base column format without the SW output-cache metadata (only C3 uses it):
+// tile data + SW row mapping, no cache-slot/cache-dir arrays.
+std::size_t columnBytesBase(const ColumnSWTCF& m) {
+    return 4 * (m.colWindowOffset.size() + m.tileRowSlot.size() + m.tileValueOffset.size() + m.values.size() +
+                m.superWindowRowOffset.size() + m.superWindowRows.size()) +
+           8 * m.tileLocalBit.size();
+}
 
 struct Formats {
     RowBitTCF row;
     RowBitTCF acc;          // original Acc METCFBit, verified equal to row
     ColumnSWTCF column;
+    std::size_t columnBaseBytes = 0;
     double rowConvertMs, accConvertMs, colConvertMs;
     std::size_t rowBytes, accBytes, columnBytes;
 };
 
-Formats buildFormats(const Matrix& m) {
+Formats buildFormats(const Matrix& m, unsigned swSize) {
     Formats f;
     auto t0 = Clock::now(); f.row = convertRow(m.rows, m.cols, m.csr); f.rowConvertMs = elapsed(t0);
     t0 = Clock::now(); f.acc = convertAccRow(m.rows, m.cols, m.csr); f.accConvertMs = elapsed(t0);
-    t0 = Clock::now(); f.column = convertColumn(m.rows, m.cols, m.csr); f.colConvertMs = elapsed(t0);
+    t0 = Clock::now(); f.column = convertColumn(m.rows, m.cols, m.csr, swSize); f.colConvertMs = elapsed(t0);
     if (f.acc.rowWindowOffset != f.row.rowWindowOffset || f.acc.tcOffset != f.row.tcOffset ||
         f.acc.sparseA2B != f.row.sparseA2B || f.acc.tcLocalBit != f.row.tcLocalBit ||
         f.acc.values != f.row.values)
         throw std::runtime_error("original Acc format differs from local Row format");
     f.rowBytes = rowBytes(f.row); f.accBytes = f.rowBytes; f.columnBytes = columnBytes(f.column);
+    f.columnBaseBytes = columnBytesBase(f.column);
     return f;
 }
 
@@ -165,19 +174,22 @@ const char* methodName(int method) {
 int main(int argc, char** argv) {
     try {
         if (argc < 2 || std::string(argv[1]) == "--help") {
-            std::cout << "Usage: benchmark_fp32 matrix.csr [F=all|128] [groups=3] [device=0] [X.bin]\n"
+            std::cout << "Usage: benchmark_fp32 matrix.csr [F=all|128] [groups=3] [device=0] [X.bin] [SW=16]\n"
                       << "all: 32,64,100,128,256,512. X.bin is K*sourceF raw FP32; truncate/cyclic-expand.\n"
+                      << "SW: Column SuperWindow size used for conversion (default 16).\n"
                       << "Output: one CSV row per (dataset,F,method) with median and min..max spread.\n";
             return 0;
         }
         int groups = argc > 3 ? std::stoi(argv[3]) : 3;
         require(groups >= 3, "at least 3 independent measurement groups required");
         check(cudaSetDevice(argc > 4 ? std::stoi(argv[4]) : 0));
+        unsigned swSize = argc > 6 ? unsigned(std::stoi(argv[6])) : COLUMN_SW_SIZE;
+        require(swSize > 0, "SW must be positive");
         cudaStream_t stream; check(cudaStreamCreateWithFlags(&stream, cudaStreamNonBlocking));
 
         auto m = readMatrix(argv[1]);
         const std::string dataset = std::string(argv[1]);
-        auto formats = buildFormats(m);
+        auto formats = buildFormats(m, swSize);
         const std::uint32_t paddedRows = (std::uint64_t(m.rows) + 7) / 8 * 8;
 
         check(cudaDeviceSynchronize());
@@ -257,7 +269,9 @@ int main(int argc, char** argv) {
                     clearStat = measureGraph(clear, repeat, groups, 3, stream);
                     kernelMs = kstat.med; clearMs = clearStat.med; completeMs = cstat.med;
                 }
-                std::size_t formatBytes = acc ? formats.accBytes : (rowMethod ? formats.rowBytes : formats.columnBytes);
+                std::size_t formatBytes = acc ? formats.accBytes
+                    : (rowMethod ? formats.rowBytes
+                        : (method == 5 ? formats.columnBytes : formats.columnBaseBytes));
                 double convertMs = acc ? formats.accConvertMs : (rowMethod ? formats.rowConvertMs : formats.colConvertMs);
                 std::cout << dataset << ',' << m.rows << ',' << m.cols << ',' << m.csr.src.size() << ',' << f << ','
                           << methodName(method) << ',' << formatBytes << ',' << convertMs << ',' << uploadMs << ','

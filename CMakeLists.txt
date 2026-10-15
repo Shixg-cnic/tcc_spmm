@@ -26,7 +26,8 @@ add_library(tcc_spmm STATIC
     src/kernel/column_spmm.cu
     src/format/column_schedule.cpp
     src/kernel/column_adaptive.cu
-    src/format/int4_quantize.cu)
+    src/format/int4_quantize.cu
+    src/kernel/column_fast.cu)
 set(TCC_SW_SIZE 16 CACHE STRING "Default Column SuperWindow size")
 set(TCC_CACHE_SIZE 32 CACHE STRING "Column cached rows per SuperWindow")
 target_compile_definitions(tcc_spmm PUBLIC TCC_SW_SIZE=${TCC_SW_SIZE} TCC_CACHE_SIZE=${TCC_CACHE_SIZE})
@@ -88,3 +89,10 @@ add_executable(column_output_diagnosis bench/column_output_diagnosis.cu)
 target_include_directories(column_output_diagnosis PRIVATE ${CMAKE_SOURCE_DIR}/tests ${CMAKE_SOURCE_DIR}/include)
 target_compile_options(column_output_diagnosis PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-O3>)
 target_link_libraries(column_output_diagnosis PRIVATE tcc_spmm)
+
+# Fast Column kernels (task-book batch 2): correctness + ablation benchmark.
+add_executable(column_fast_test tests/column_fast_test.cu)
+target_include_directories(column_fast_test PRIVATE ${CMAKE_SOURCE_DIR}/tests)
+target_compile_options(column_fast_test PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-O3>)
+target_link_libraries(column_fast_test PRIVATE tcc_spmm)
+add_test(NAME column_fast_correctness COMMAND column_fast_test)

@@ -27,6 +27,24 @@ __device__ void loadX(const float* x, U w, U cols, U f, U features, float b[2][4
         }
     }
 }
+// Fused INT4 loader (see loadXInt4 in column_spmm.cu for the packing).
+__device__ void loadXInt4(const DeviceInt4X* x, U w, U cols, U f, U features, float b[2][4]) {
+    U lane=threadIdx.x%32, group=lane/4, k=lane%4;
+    #pragma unroll
+    for (int part=0; part<2; ++part) {
+        #pragma unroll
+        for (int i=0; i<4; ++i) {
+            U col=w*8+k+(i>=2 ? 4 : 0);
+            U feature=f+group+(i%2)*8+part*16;
+            float v=0.f;
+            if (col<cols && feature<features) {
+                std::size_t idx = packedByteIndex(col, feature, features);
+                v=int4ToFloat(nibbleAt(x->q,idx,feature),x->scale[col]);
+            }
+            b[part][i]=v;
+        }
+    }
+}
 __device__ void stageTile(DeviceColumnAdaptive m, U tile, float* a, U* slots) {
     U tid=threadIdx.x;
     if (tid<64) {
@@ -50,8 +68,8 @@ __device__ void prefetchTile(DeviceColumnAdaptive m, U tile, float* a, U* slots)
     asm volatile("cp.async.commit_group;" ::: "memory");
 }
 
-template<bool UseCache>
-__global__ void columnAdaptiveKernel(DeviceColumnAdaptive m, const float* x, float* y, U features) {
+template<bool UseCache, bool Int4=false>
+__global__ void columnAdaptiveKernel(DeviceColumnAdaptive m, const void* x, float* y, U features) {
     __shared__ float a[2][64];
     __shared__ U slots[2][8];
     extern __shared__ float cache[];
@@ -70,7 +88,8 @@ __global__ void columnAdaptiveKernel(DeviceColumnAdaptive m, const float* x, flo
         U cwFirst = max(task.tileBegin, m.colWindowOffset[cw]);
         U cwLast  = min(task.tileEnd, m.colWindowOffset[cw+1]);
         if (cwFirst>=cwLast) continue;
-        loadX(x, cw, m.cols, fBase, features, b);
+        if constexpr (Int4) loadXInt4(static_cast<const DeviceInt4X*>(x), cw, m.cols, fBase, features, b);
+        else loadX(static_cast<const float*>(x), cw, m.cols, fBase, features, b);
         stageTile(m, cwFirst, a[0], slots[0]);
         __syncthreads();
         for (U tile=cwFirst; tile<cwLast; ++tile) {
@@ -133,5 +152,20 @@ cudaError_t launchColumnAdaptiveSpMM(const DeviceColumnAdaptive& matrix, const f
         columnAdaptiveKernel<true><<<grid, COLUMN_FEATURE_TILE, CACHE_BYTES, stream>>>(matrix, x, y, features);
     else
         columnAdaptiveKernel<false><<<grid, COLUMN_FEATURE_TILE, 0, stream>>>(matrix, x, y, features);
+    return cudaGetLastError();
+}
+
+cudaError_t launchColumnAdaptiveInt4SpMM(const DeviceColumnAdaptive& matrix, const DeviceInt4X& x, float* y,
+    std::uint32_t features, bool useCache, cudaStream_t stream, bool clearOutput) {
+    if (!matrix.taskCount || !features || !x.q || !x.scale || !y) return cudaErrorInvalidValue;
+    if (clearOutput) {
+        auto err = cudaMemsetAsync(y, 0, std::size_t(matrix.rows)*features*sizeof(float), stream);
+        if (err) return err;
+    }
+    dim3 grid(matrix.taskCount, (std::uint64_t(features)+COLUMN_FEATURE_TILE-1)/COLUMN_FEATURE_TILE);
+    if (useCache)
+        columnAdaptiveKernel<true,true><<<grid, COLUMN_FEATURE_TILE, CACHE_BYTES, stream>>>(matrix, &x, y, features);
+    else
+        columnAdaptiveKernel<false,true><<<grid, COLUMN_FEATURE_TILE, 0, stream>>>(matrix, &x, y, features);
     return cudaGetLastError();
 }

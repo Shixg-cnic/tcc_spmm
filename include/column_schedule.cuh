@@ -84,3 +84,6 @@ ColumnAdaptiveFormat buildAdaptiveColumn(const ColumnBaseFormat& base, const Col
 // useCache selects the C3-style SW output cache (default true).
 cudaError_t launchColumnAdaptiveSpMM(const DeviceColumnAdaptive& matrix, const float* x, float* y,
     std::uint32_t features, bool useCache, cudaStream_t stream = nullptr, bool clearOutput = true);
+// Fused INT4 variant (x.q/x.scale packed+scaled, see int4_format.cuh).
+cudaError_t launchColumnAdaptiveInt4SpMM(const DeviceColumnAdaptive& matrix, const DeviceInt4X& x, float* y,
+    std::uint32_t features, bool useCache, cudaStream_t stream = nullptr, bool clearOutput = true);

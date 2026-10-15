@@ -30,10 +30,11 @@ tcc_spmm/
 │   ├── row_format.cuh
 │   ├── column_format.cuh
 │   ├── column_schedule.cuh   # 动态 SW 调度（任务表/自适应格式）
+│   ├── int4_format.cuh       # INT4 per-node scale 布局与设备辅助（M4）
 │   ├── mma_tf32.cuh
 │   └── pipeline.cuh
 ├── src/
-│   ├── format/               # csr / Row / Column CPU 转换（含 column_schedule.cpp）
+│   ├── format/               # csr / Row / Column CPU 转换（含 column_schedule.cpp、int4_quantize.cu）
 │   └── kernel/               # Row / Column FP32 Tensor Core 算子（含 column_adaptive.cu）
 ├── tests/
 │   ├── row_spmm_test.cu       # 原生正确性与计时入口
@@ -46,7 +47,8 @@ tcc_spmm/
 │   └── acc_reference.cu      # 原始 Acc Row 对照
 ├── bench/
 │   ├── benchmark_fp32.cu     # 统一 FP32 基线：Acc 原始 + Row + C0–C3 + Dyn*
-│   └── model_calibration.py  # 可校准性能模型（3.6）
+│   ├── benchmark_int4.cu     # INT4 融合核 vs 独立反量化基线 vs FP32（M4）
+│   └── model_calibration.py  # 可校准性能模型（3.6，FP32 与 INT4 重校准）
 ├── third_party/Acc-SpMM/     # 原始源码与 License
 └── results/                 # 实测报告及原始记录（baseline/adaptive/int4）
 ```
@@ -83,9 +85,21 @@ make -j
 ./benchmark_fp32 matrix.csr all 3 0 X.bin
 ./benchmark_fp32 matrix.csr 128 3 0 X.bin
 
+# INT4 融合核基准（M4）：quantizeXInt4 一次后测
+# FP32-C1/C3/Dyn* 对照 + Int4-C0/C1/C3/DynCache/DynNoCache
+# + Baseline-DeqC1（独立反量化+FP32 C1）+ DequantOnly
+# all 包含 F=32/64/100/128/256/512
+./benchmark_int4 matrix.csr all 3 0 X.bin
+./benchmark_int4 matrix.csr 128 3 0 X.bin
+
 # 内存和共享内存竞争检查
 compute-sanitizer --tool memcheck --error-exitcode 9 ./column_spmm_test
 compute-sanitizer --tool racecheck --error-exitcode 9 ./column_spmm_test
+
+# INT4 量化/反量化与融合核正确性（M4，含奇偶 F）
+./int4_test
+compute-sanitizer --tool memcheck --error-exitcode 9 ./int4_test
+compute-sanitizer --tool racecheck --error-exitcode 9 ./int4_test
 ```
 
 已克隆仓库时，直接从 `mkdir -p build` 开始。RTX 5090 使用默认 `sm_120`；其他 GPU 可通过 `-DCMAKE_CUDA_ARCHITECTURES=...` 指定架构。
@@ -121,3 +135,15 @@ launchColumnSpMM(deviceColumn, deviceX, deviceY, F, ColumnVersion::C3, stream);
 M2 列优化分析见 [results/baseline/column_fp32_optimized.md](results/baseline/column_fp32_optimized.md)。
 M3 动态 SuperWindow 调度及模型见 [results/baseline/column_fp32_dynamic.md](results/baseline/column_fp32_dynamic.md)
 与 [docs/design.md](docs/design.md)。
+
+第四阶段（M4）：融合 INT4 反量化。`include/int4_format.cuh` 定义 per-node
+scale 的量化/打包布局与设备辅助；`src/format/int4_quantize.cu` 提供
+`quantizeXInt4`/`dequantizeXInt4`；固定与自适应 Column 核增加 `Int4` 模板
+开关，加载 X 时寄存器反量化（A 流、MMA、输出累加不变）。正确性、
+模型重校准与全部实测见
+[results/int4/int4_report.md](results/int4/int4_report.md)。
+
+最终消融（M5）：各里程碑最佳（F=128，kernel ms 中位数）——arxiv
+Int4-DynNoCache 1.080（0.90× Acc，反超原 Acc）；products Int4-DynCache
+102.76（3.28× Acc，原子地板锁定）。逐里程碑贡献、结构性瓶颈与复现说明
+见 [results/final_ablation.md](results/final_ablation.md)。

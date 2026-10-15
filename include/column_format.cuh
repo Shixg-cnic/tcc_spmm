@@ -1,5 +1,6 @@
 #pragma once
 #include "csr.cuh"
+#include "int4_format.cuh"
 
 #ifndef TCC_SW_SIZE
 #define TCC_SW_SIZE 16
@@ -41,6 +42,10 @@ enum class ColumnVersion { C0, C1, C2, C3 };
 // By default includes asynchronous Y initialization. Set clearOutput=false only
 // when Y was explicitly zeroed on this stream (e.g. isolated kernel timing).
 cudaError_t launchColumnSpMM(const DeviceColumnSWTCF& matrix, const float* x, float* y,
+    std::uint32_t features, ColumnVersion version, cudaStream_t stream = nullptr,
+    bool clearOutput = true);
+// Fused INT4 variant: x.q/x.scale are the packed+scaled X (see int4_format.cuh).
+cudaError_t launchColumnInt4SpMM(const DeviceColumnSWTCF& matrix, const DeviceInt4X& x, float* y,
     std::uint32_t features, ColumnVersion version, cudaStream_t stream = nullptr,
     bool clearOutput = true);
 struct ColumnKernelInfo {

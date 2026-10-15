@@ -25,7 +25,8 @@ add_library(tcc_spmm STATIC
     src/format/column_convert.cpp
     src/kernel/column_spmm.cu
     src/format/column_schedule.cpp
-    src/kernel/column_adaptive.cu)
+    src/kernel/column_adaptive.cu
+    src/format/int4_quantize.cu)
 set(TCC_SW_SIZE 16 CACHE STRING "Default Column SuperWindow size")
 set(TCC_CACHE_SIZE 32 CACHE STRING "Column cached rows per SuperWindow")
 target_compile_definitions(tcc_spmm PUBLIC TCC_SW_SIZE=${TCC_SW_SIZE} TCC_CACHE_SIZE=${TCC_CACHE_SIZE})
@@ -48,6 +49,10 @@ add_executable(adaptive_sw_test tests/adaptive_sw_test.cu)
 target_compile_options(adaptive_sw_test PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-O3>)
 target_link_libraries(adaptive_sw_test PRIVATE tcc_spmm)
 add_test(NAME adaptive_sw_correctness COMMAND adaptive_sw_test)
+add_executable(int4_test tests/int4_test.cu)
+target_compile_options(int4_test PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-O3>)
+target_link_libraries(int4_test PRIVATE tcc_spmm)
+add_test(NAME int4_correctness COMMAND int4_test)
 add_executable(compare_row_column tests/compare_row_column.cu)
 target_compile_options(compare_row_column PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-O3>)
 target_link_libraries(compare_row_column PRIVATE tcc_spmm)
@@ -57,6 +62,13 @@ add_executable(benchmark_fp32 bench/benchmark_fp32.cu tests/acc_reference.cu)
 target_include_directories(benchmark_fp32 PRIVATE ${CUSPARSE_INCLUDE_DIR} ${CUBLAS_INCLUDE_DIR} ${CMAKE_SOURCE_DIR}/tests)
 target_compile_options(benchmark_fp32 PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-O3>)
 target_link_libraries(benchmark_fp32 PRIVATE tcc_spmm)
+
+# INT4 fused-kernel benchmark: quantised X + fused fixed/adaptive INT4 kernels
+# vs the independent dequantize+FP32 baseline vs the FP32 pipeline.
+add_executable(benchmark_int4 bench/benchmark_int4.cu)
+target_include_directories(benchmark_int4 PRIVATE ${CMAKE_SOURCE_DIR}/tests)
+target_compile_options(benchmark_int4 PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-O3>)
+target_link_libraries(benchmark_int4 PRIVATE tcc_spmm)
 
 # Offline Column-SWTCF structural analysis (atomic/workload statistics).
 add_executable(analyze_structure bench/analyze_structure.cu)

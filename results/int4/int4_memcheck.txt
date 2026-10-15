@@ -1,0 +1,323 @@
+========= COMPUTE-SANITIZER
+  weighted   C0 fused err=0
+  weighted   C1 fused err=0
+  weighted   C2 fused err=0
+  weighted   C3 fused err=0
+  weighted   baseline deq+C1 err=0
+  weighted   dyn0  fused err=0
+  weighted   dyn1  fused err=0
+  weighted   F=  1 tasks=34 quantization-delta-rmse(max)=0.000186787 best-tf32-err=0
+  weighted   C0 fused err=0
+  weighted   C1 fused err=0
+  weighted   C2 fused err=0
+  weighted   C3 fused err=0
+  weighted   baseline deq+C1 err=0
+  weighted   dyn0  fused err=0
+  weighted   dyn1  fused err=0
+  weighted   F= 17 tasks=34 quantization-delta-rmse(max)=0.0622841 best-tf32-err=0
+  weighted   C0 fused err=0
+  weighted   C1 fused err=0
+  weighted   C2 fused err=0
+  weighted   C3 fused err=0
+  weighted   baseline deq+C1 err=0
+  weighted   dyn0  fused err=0
+  weighted   dyn1  fused err=0
+  weighted   F= 32 tasks=34 quantization-delta-rmse(max)=0.0690423 best-tf32-err=0
+  weighted   C0 fused err=0
+  weighted   C1 fused err=0
+  weighted   C2 fused err=0
+  weighted   C3 fused err=0
+  weighted   baseline deq+C1 err=0
+  weighted   dyn0  fused err=0
+  weighted   dyn1  fused err=0
+  weighted   F= 64 tasks=34 quantization-delta-rmse(max)=0.0674243 best-tf32-err=0
+  weighted   C0 fused err=0
+  weighted   C1 fused err=0
+  weighted   C2 fused err=0
+  weighted   C3 fused err=0
+  weighted   baseline deq+C1 err=0
+  weighted   dyn0  fused err=0
+  weighted   dyn1  fused err=0
+  weighted   F=100 tasks=34 quantization-delta-rmse(max)=0.0717484 best-tf32-err=0
+  weighted   C0 fused err=0
+  weighted   C1 fused err=0
+  weighted   C2 fused err=0
+  weighted   C3 fused err=0
+  weighted   baseline deq+C1 err=0
+  weighted   dyn0  fused err=0
+  weighted   dyn1  fused err=0
+  weighted   F=128 tasks=34 quantization-delta-rmse(max)=0.0693209 best-tf32-err=0
+  weighted   C0 fused err=0
+  weighted   C1 fused err=0
+  weighted   C2 fused err=0
+  weighted   C3 fused err=0
+  weighted   baseline deq+C1 err=0
+  weighted   dyn0  fused err=0
+  weighted   dyn1  fused err=0
+  weighted   F=256 tasks=34 quantization-delta-rmse(max)=0.0708987 best-tf32-err=0
+  weighted   C0 fused err=0
+  weighted   C1 fused err=0
+  weighted   C2 fused err=0
+  weighted   C3 fused err=0
+  weighted   baseline deq+C1 err=0
+  weighted   dyn0  fused err=0
+  weighted   dyn1  fused err=0
+  weighted   F=512 tasks=34 quantization-delta-rmse(max)=0.0711103 best-tf32-err=0
+  dense      C0 fused err=0
+  dense      C1 fused err=0
+  dense      C2 fused err=0
+  dense      C3 fused err=0
+  dense      baseline deq+C1 err=0
+  dense      dyn0  fused err=0
+  dense      dyn1  fused err=0
+  dense      F=  1 tasks=3 quantization-delta-rmse(max)=0.000208063 best-tf32-err=0
+  dense      C0 fused err=0
+  dense      C1 fused err=0
+  dense      C2 fused err=0
+  dense      C3 fused err=0
+  dense      baseline deq+C1 err=0
+  dense      dyn0  fused err=0
+  dense      dyn1  fused err=0
+  dense      F= 17 tasks=3 quantization-delta-rmse(max)=0.0845184 best-tf32-err=0
+  dense      C0 fused err=0
+  dense      C1 fused err=0
+  dense      C2 fused err=0
+  dense      C3 fused err=0
+  dense      baseline deq+C1 err=0
+  dense      dyn0  fused err=0
+  dense      dyn1  fused err=0
+  dense      F= 32 tasks=3 quantization-delta-rmse(max)=0.0776241 best-tf32-err=0
+  dense      C0 fused err=0
+  dense      C1 fused err=0
+  dense      C2 fused err=0
+  dense      C3 fused err=0
+  dense      baseline deq+C1 err=0
+  dense      dyn0  fused err=0
+  dense      dyn1  fused err=0
+  dense      F= 64 tasks=3 quantization-delta-rmse(max)=0.0965343 best-tf32-err=0
+  dense      C0 fused err=0
+  dense      C1 fused err=0
+  dense      C2 fused err=0
+  dense      C3 fused err=0
+  dense      baseline deq+C1 err=0
+  dense      dyn0  fused err=0
+  dense      dyn1  fused err=0
+  dense      F=100 tasks=3 quantization-delta-rmse(max)=0.0675153 best-tf32-err=0
+  dense      C0 fused err=0
+  dense      C1 fused err=0
+  dense      C2 fused err=0
+  dense      C3 fused err=0
+  dense      baseline deq+C1 err=0
+  dense      dyn0  fused err=0
+  dense      dyn1  fused err=0
+  dense      F=128 tasks=3 quantization-delta-rmse(max)=0.0703764 best-tf32-err=0
+  dense      C0 fused err=0
+  dense      C1 fused err=0
+  dense      C2 fused err=0
+  dense      C3 fused err=0
+  dense      baseline deq+C1 err=0
+  dense      dyn0  fused err=0
+  dense      dyn1  fused err=0
+  dense      F=256 tasks=3 quantization-delta-rmse(max)=0.0744492 best-tf32-err=0
+  dense      C0 fused err=0
+  dense      C1 fused err=0
+  dense      C2 fused err=0
+  dense      C3 fused err=0
+  dense      baseline deq+C1 err=0
+  dense      dyn0  fused err=0
+  dense      dyn1  fused err=0
+  dense      F=512 tasks=3 quantization-delta-rmse(max)=0.0672075 best-tf32-err=0
+  zero       C0 fused err=0
+  zero       C1 fused err=0
+  zero       C2 fused err=0
+  zero       C3 fused err=0
+  zero       baseline deq+C1 err=0
+  zero       dyn0  fused err=0
+  zero       dyn1  fused err=0
+  zero       F=  1 tasks=1 quantization-delta-rmse(max)=0 best-tf32-err=0
+  zero       C0 fused err=0
+  zero       C1 fused err=0
+  zero       C2 fused err=0
+  zero       C3 fused err=0
+  zero       baseline deq+C1 err=0
+  zero       dyn0  fused err=0
+  zero       dyn1  fused err=0
+  zero       F= 17 tasks=1 quantization-delta-rmse(max)=0 best-tf32-err=0
+  zero       C0 fused err=0
+  zero       C1 fused err=0
+  zero       C2 fused err=0
+  zero       C3 fused err=0
+  zero       baseline deq+C1 err=0
+  zero       dyn0  fused err=0
+  zero       dyn1  fused err=0
+  zero       F= 32 tasks=1 quantization-delta-rmse(max)=0 best-tf32-err=0
+  zero       C0 fused err=0
+  zero       C1 fused err=0
+  zero       C2 fused err=0
+  zero       C3 fused err=0
+  zero       baseline deq+C1 err=0
+  zero       dyn0  fused err=0
+  zero       dyn1  fused err=0
+  zero       F= 64 tasks=1 quantization-delta-rmse(max)=0 best-tf32-err=0
+  zero       C0 fused err=0
+  zero       C1 fused err=0
+  zero       C2 fused err=0
+  zero       C3 fused err=0
+  zero       baseline deq+C1 err=0
+  zero       dyn0  fused err=0
+  zero       dyn1  fused err=0
+  zero       F=100 tasks=1 quantization-delta-rmse(max)=0 best-tf32-err=0
+  zero       C0 fused err=0
+  zero       C1 fused err=0
+  zero       C2 fused err=0
+  zero       C3 fused err=0
+  zero       baseline deq+C1 err=0
+  zero       dyn0  fused err=0
+  zero       dyn1  fused err=0
+  zero       F=128 tasks=1 quantization-delta-rmse(max)=0 best-tf32-err=0
+  zero       C0 fused err=0
+  zero       C1 fused err=0
+  zero       C2 fused err=0
+  zero       C3 fused err=0
+  zero       baseline deq+C1 err=0
+  zero       dyn0  fused err=0
+  zero       dyn1  fused err=0
+  zero       F=256 tasks=1 quantization-delta-rmse(max)=0 best-tf32-err=0
+  zero       C0 fused err=0
+  zero       C1 fused err=0
+  zero       C2 fused err=0
+  zero       C3 fused err=0
+  zero       baseline deq+C1 err=0
+  zero       dyn0  fused err=0
+  zero       dyn1  fused err=0
+  zero       F=512 tasks=1 quantization-delta-rmse(max)=0 best-tf32-err=0
+  repeated   C0 fused err=0
+  repeated   C1 fused err=0
+  repeated   C2 fused err=0
+  repeated   C3 fused err=0
+  repeated   baseline deq+C1 err=0
+  repeated   dyn0  fused err=0
+  repeated   dyn1  fused err=0
+  repeated   F=  1 tasks=1 quantization-delta-rmse(max)=0.000126571 best-tf32-err=0
+  repeated   C0 fused err=0
+  repeated   C1 fused err=0
+  repeated   C2 fused err=0
+  repeated   C3 fused err=0
+  repeated   baseline deq+C1 err=0
+  repeated   dyn0  fused err=0
+  repeated   dyn1  fused err=0
+  repeated   F= 17 tasks=1 quantization-delta-rmse(max)=0.0529408 best-tf32-err=0
+  repeated   C0 fused err=0
+  repeated   C1 fused err=0
+  repeated   C2 fused err=0
+  repeated   C3 fused err=0
+  repeated   baseline deq+C1 err=0
+  repeated   dyn0  fused err=0
+  repeated   dyn1  fused err=0
+  repeated   F= 32 tasks=1 quantization-delta-rmse(max)=0.0657734 best-tf32-err=0
+  repeated   C0 fused err=0
+  repeated   C1 fused err=0
+  repeated   C2 fused err=0
+  repeated   C3 fused err=0
+  repeated   baseline deq+C1 err=0
+  repeated   dyn0  fused err=0
+  repeated   dyn1  fused err=0
+  repeated   F= 64 tasks=1 quantization-delta-rmse(max)=0.0696206 best-tf32-err=0
+  repeated   C0 fused err=0
+  repeated   C1 fused err=0
+  repeated   C2 fused err=0
+  repeated   C3 fused err=0
+  repeated   baseline deq+C1 err=0
+  repeated   dyn0  fused err=0
+  repeated   dyn1  fused err=0
+  repeated   F=100 tasks=1 quantization-delta-rmse(max)=0.0653685 best-tf32-err=0
+  repeated   C0 fused err=0
+  repeated   C1 fused err=0
+  repeated   C2 fused err=0
+  repeated   C3 fused err=0
+  repeated   baseline deq+C1 err=0
+  repeated   dyn0  fused err=0
+  repeated   dyn1  fused err=0
+  repeated   F=128 tasks=1 quantization-delta-rmse(max)=0.0685137 best-tf32-err=0
+  repeated   C0 fused err=0
+  repeated   C1 fused err=0
+  repeated   C2 fused err=0
+  repeated   C3 fused err=0
+  repeated   baseline deq+C1 err=0
+  repeated   dyn0  fused err=0
+  repeated   dyn1  fused err=0
+  repeated   F=256 tasks=1 quantization-delta-rmse(max)=0.0691347 best-tf32-err=0
+  repeated   C0 fused err=0
+  repeated   C1 fused err=0
+  repeated   C2 fused err=0
+  repeated   C3 fused err=0
+  repeated   baseline deq+C1 err=0
+  repeated   dyn0  fused err=0
+  repeated   dyn1  fused err=0
+  repeated   F=512 tasks=1 quantization-delta-rmse(max)=0.0694228 best-tf32-err=0
+  negative   C0 fused err=0
+  negative   C1 fused err=0
+  negative   C2 fused err=0
+  negative   C3 fused err=0
+  negative   baseline deq+C1 err=0
+  negative   dyn0  fused err=0
+  negative   dyn1  fused err=0
+  negative   F=  1 tasks=1 quantization-delta-rmse(max)=0.000250362 best-tf32-err=0
+  negative   C0 fused err=0
+  negative   C1 fused err=0
+  negative   C2 fused err=0
+  negative   C3 fused err=0
+  negative   baseline deq+C1 err=0
+  negative   dyn0  fused err=0
+  negative   dyn1  fused err=0
+  negative   F= 17 tasks=1 quantization-delta-rmse(max)=0.0685142 best-tf32-err=0
+  negative   C0 fused err=0
+  negative   C1 fused err=0
+  negative   C2 fused err=0
+  negative   C3 fused err=0
+  negative   baseline deq+C1 err=0
+  negative   dyn0  fused err=0
+  negative   dyn1  fused err=0
+  negative   F= 32 tasks=1 quantization-delta-rmse(max)=0.0734572 best-tf32-err=0
+  negative   C0 fused err=0
+  negative   C1 fused err=0
+  negative   C2 fused err=0
+  negative   C3 fused err=0
+  negative   baseline deq+C1 err=0
+  negative   dyn0  fused err=0
+  negative   dyn1  fused err=0
+  negative   F= 64 tasks=1 quantization-delta-rmse(max)=0.0704063 best-tf32-err=0
+  negative   C0 fused err=0
+  negative   C1 fused err=0
+  negative   C2 fused err=0
+  negative   C3 fused err=0
+  negative   baseline deq+C1 err=0
+  negative   dyn0  fused err=0
+  negative   dyn1  fused err=0
+  negative   F=100 tasks=1 quantization-delta-rmse(max)=0.0723542 best-tf32-err=0
+  negative   C0 fused err=0
+  negative   C1 fused err=0
+  negative   C2 fused err=0
+  negative   C3 fused err=0
+  negative   baseline deq+C1 err=0
+  negative   dyn0  fused err=0
+  negative   dyn1  fused err=0
+  negative   F=128 tasks=1 quantization-delta-rmse(max)=0.0720889 best-tf32-err=0
+  negative   C0 fused err=0
+  negative   C1 fused err=0
+  negative   C2 fused err=0
+  negative   C3 fused err=0
+  negative   baseline deq+C1 err=0
+  negative   dyn0  fused err=0
+  negative   dyn1  fused err=0
+  negative   F=256 tasks=1 quantization-delta-rmse(max)=0.0718399 best-tf32-err=0
+  negative   C0 fused err=0
+  negative   C1 fused err=0
+  negative   C2 fused err=0
+  negative   C3 fused err=0
+  negative   baseline deq+C1 err=0
+  negative   dyn0  fused err=0
+  negative   dyn1  fused err=0
+  negative   F=512 tasks=1 quantization-delta-rmse(max)=0.0720056 best-tf32-err=0
+int4_test: all configurations passed
+========= ERROR SUMMARY: 0 errors

@@ -1,6 +1,7 @@
 // MMA mapping and asynchronous staging derived from Acc-SpMM,
 // MIT (c) 2025 Haisha Zhao. Column scheduling/output ownership are adapted here.
 #include "column_format.cuh"
+#include "int4_format.cuh"
 #include "mma_tf32.cuh"
 #include "pipeline.cuh"
 #include <limits>
@@ -18,6 +19,27 @@ __device__ void loadX(const float* x, U w, U cols, U f, U features, float b[2][4
             U col=w*8+k+(i>=2 ? 4 : 0);
             U feature=f+group+(i%2)*8+part*16;
             b[part][i]=col<cols && feature<features ? x[std::size_t(col)*features+feature] : 0.f;
+        }
+    }
+}
+
+// Fused INT4 loader: reads the packed stream, dequantises q*s in registers,
+// producing exactly the FP32 fragment the MMA consumes. Same indexing as
+// loadX (feature j of node col lives at q[col*features+j], nibble j&1).
+__device__ void loadXInt4(const DeviceInt4X* x, U w, U cols, U f, U features, float b[2][4]) {
+    U lane=threadIdx.x%32, group=lane/4, k=lane%4;
+    #pragma unroll
+    for (int part=0; part<2; ++part) {
+        #pragma unroll
+        for (int i=0; i<4; ++i) {
+            U col=w*8+k+(i>=2 ? 4 : 0);
+            U feature=f+group+(i%2)*8+part*16;
+            float v=0.f;
+            if (col<cols && feature<features) {
+                std::size_t idx = packedByteIndex(col, feature, features);
+                v=int4ToFloat(nibbleAt(x->q,idx,feature),x->scale[col]);
+            }
+            b[part][i]=v;
         }
     }
 }
@@ -52,8 +74,8 @@ __device__ void prefetchTile(DeviceColumnSWTCF m, U tile, float* a, U* slots) {
 // row occurs in exactly one tile, so cached updates have a unique lane owner.
 // CTA barriers separate tiles/windows; no shared atomic or warp-group copies
 // are necessary with this single-group scheduling.
-template<int Version>
-__global__ void columnKernel(DeviceColumnSWTCF m, const float* x, float* y, U features) {
+template<int Version, bool Int4=false>
+__global__ void columnKernel(DeviceColumnSWTCF m, const void* x, float* y, U features) {
     __shared__ float a[Version==0 ? 1 : 2][64];
     __shared__ U slots[Version==0 ? 1 : 2][8];
     extern __shared__ float cache[];
@@ -78,7 +100,8 @@ __global__ void columnKernel(DeviceColumnSWTCF m, const float* x, float* y, U fe
                 #pragma unroll
                 for(int i=0;i<4;++i) b[part][i]=nextX[part][i];
             }
-        } else loadX(x,w,m.cols,fBase,features,b);
+        } else if constexpr (Int4) loadXInt4(static_cast<const DeviceInt4X*>(x),w,m.cols,fBase,features,b);
+        else loadX(static_cast<const float*>(x),w,m.cols,fBase,features,b);
         prefetched=false;
         U first=m.colWindowOffset[w], end=m.colWindowOffset[w+1];
         if constexpr(Version>0) {
@@ -90,7 +113,11 @@ __global__ void columnKernel(DeviceColumnSWTCF m, const float* x, float* y, U fe
             if constexpr(Version==0) {stageTile(m,tile,a[0],slots[0]); __syncthreads();}
             else if(tile+1<end) prefetchTile(m,tile+1,a[buffer^1],slots[buffer^1]);
             if constexpr(Version>=2) {
-                if(tile+1==end && w+1<endWindow) {loadX(x,w+1,m.cols,fBase,features,nextX);prefetched=true;}
+                if(tile+1==end && w+1<endWindow) {
+                    if constexpr (Int4) loadXInt4(static_cast<const DeviceInt4X*>(x),w+1,m.cols,fBase,features,nextX);
+                    else loadX(static_cast<const float*>(x),w+1,m.cols,fBase,features,nextX);
+                    prefetched=true;
+                }
             }
             U lane=threadIdx.x%32, group=lane/4, k=lane%4;
             float sparse[2]={a[buffer][group*8+k],a[buffer][group*8+k+4]};
@@ -136,10 +163,19 @@ __global__ void columnKernel(DeviceColumnSWTCF m, const float* x, float* y, U fe
 
 const void* kernelPointer(ColumnVersion version) {
     switch(version) {
-        case ColumnVersion::C0:return reinterpret_cast<const void*>(columnKernel<0>);
-        case ColumnVersion::C1:return reinterpret_cast<const void*>(columnKernel<1>);
-        case ColumnVersion::C2:return reinterpret_cast<const void*>(columnKernel<2>);
-        case ColumnVersion::C3:return reinterpret_cast<const void*>(columnKernel<3>);
+        case ColumnVersion::C0:return reinterpret_cast<const void*>(columnKernel<0,false>);
+        case ColumnVersion::C1:return reinterpret_cast<const void*>(columnKernel<1,false>);
+        case ColumnVersion::C2:return reinterpret_cast<const void*>(columnKernel<2,false>);
+        case ColumnVersion::C3:return reinterpret_cast<const void*>(columnKernel<3,false>);
+    }
+    return nullptr;
+}
+const void* int4KernelPointer(ColumnVersion version) {
+    switch(version) {
+        case ColumnVersion::C0:return reinterpret_cast<const void*>(columnKernel<0,true>);
+        case ColumnVersion::C1:return reinterpret_cast<const void*>(columnKernel<1,true>);
+        case ColumnVersion::C2:return reinterpret_cast<const void*>(columnKernel<2,true>);
+        case ColumnVersion::C3:return reinterpret_cast<const void*>(columnKernel<3,true>);
     }
     return nullptr;
 }
@@ -166,6 +202,29 @@ cudaError_t launchColumnSpMM(const DeviceColumnSWTCF& m, const float* x, float* 
         case ColumnVersion::C1:columnKernel<1><<<grid,WARPS*32,0,stream>>>(m,x,y,features);break;
         case ColumnVersion::C2:columnKernel<2><<<grid,WARPS*32,0,stream>>>(m,x,y,features);break;
         case ColumnVersion::C3:columnKernel<3><<<grid,WARPS*32,CACHE_BYTES,stream>>>(m,x,y,features);break;
+    }
+    return cudaGetLastError();
+}
+cudaError_t launchColumnInt4SpMM(const DeviceColumnSWTCF& m, const DeviceInt4X& x, float* y,
+    U features, ColumnVersion version, cudaStream_t stream, bool clearOutput) {
+    if(!m.rows || !m.cols || !m.superWindowSize || !features || !x.q || !x.scale || !y ||
+        !int4KernelPointer(version))
+        return cudaErrorInvalidValue;
+    if(std::uint64_t(m.rows)*features>std::numeric_limits<std::size_t>::max()/sizeof(float) ||
+        (std::uint64_t(features)+COLUMN_FEATURE_TILE-1)/COLUMN_FEATURE_TILE>65535)
+        return cudaErrorInvalidValue;
+    if(clearOutput) {
+        auto status=cudaMemsetAsync(y,0,std::size_t(m.rows)*features*sizeof(float),stream);
+        if(status!=cudaSuccess) return status;
+    }
+    U windows=(std::uint64_t(m.cols)+7)/8;
+    U tasks=int(version)>=2 ? (std::uint64_t(windows)+m.superWindowSize-1)/m.superWindowSize : windows;
+    dim3 grid(tasks,(std::uint64_t(features)+COLUMN_FEATURE_TILE-1)/COLUMN_FEATURE_TILE);
+    switch(version) {
+        case ColumnVersion::C0:columnKernel<0,true><<<grid,WARPS*32,0,stream>>>(m,&x,y,features);break;
+        case ColumnVersion::C1:columnKernel<1,true><<<grid,WARPS*32,0,stream>>>(m,&x,y,features);break;
+        case ColumnVersion::C2:columnKernel<2,true><<<grid,WARPS*32,0,stream>>>(m,&x,y,features);break;
+        case ColumnVersion::C3:columnKernel<3,true><<<grid,WARPS*32,CACHE_BYTES,stream>>>(m,&x,y,features);break;
     }
     return cudaGetLastError();
 }

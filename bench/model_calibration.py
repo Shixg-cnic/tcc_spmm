@@ -14,7 +14,7 @@
 # cross-graph transfer is reported to show constants do not transfer.
 #
 # Usage: python3 model_calibration.py  -> prints all tables
-import csv, math, os
+import csv, math, os, sys
 import numpy as np
 
 ROOT = 'results/baseline'
@@ -124,6 +124,15 @@ def table(coef, probe_atomic, pts, fonly=None):
         rows.append((method, f, measured, pr, (pr - measured) / measured))
     return rows
 
+def report(coef, probe_atomic, pts, name):
+    errs = []
+    for method, f, measured, pr, rel in table(coef, probe_atomic, pts):
+        errs.append(rel)
+        print(f'   {method:11s} F={f:4d} measured={measured:9.3f} pred={pr:9.3f} ({rel*100:+6.1f}%)')
+    rmse = np.sqrt(np.mean(np.array([(predict(coef, probe_atomic, fe) - m) for _, _, fe, m in pts])**2))
+    print(f'   {name}: n={len(pts)} rmse={rmse:.3f} ms median-rel={np.median(errs)*100:+.1f}% '
+          f'max-abs-rel={max(abs(e) for e in errs)*100:.1f}%')
+
 def main():
     arx_rows = load_csv('arxiv_fp32_opt.csv') + load_csv('arxiv_fp32_dyn2.csv')
     pro_rows = load_csv('products_fp32_opt.csv') + load_csv('products_fp32_dyn.csv')
@@ -178,4 +187,51 @@ def main():
                   f'p99={st["p99"]} mean={st["mean"]:.1f} saved_atomics={st["saved"]}')
 
 if __name__ == '__main__':
+    if len(sys.argv) > 1 and sys.argv[1] == 'int4':
+        import sys as _s
+        # INT4 recalibration (M4): same model structure, coefficients re-fit on
+        # the fused INT4 kernel times; the schedule features are identical to
+        # FP32 (same schedule/task table), the atomic term is unchanged (same
+        # output atomics), the per-task compute term changes because X loads
+        # are 4x smaller and carry a register dequantisation.
+        arx_rows = load_csv(os.path.join('..', 'int4', 'arxiv_int4_f128.csv')) + load_csv(os.path.join('..', 'int4', 'arxiv_int4.csv'))
+        pro_rows = load_csv(os.path.join('..', 'int4', 'products_int4_f128.csv')) + load_csv(os.path.join('..', 'int4', 'products_int4.csv'))
+        arx_dyn = dyn_stats('arxiv_fp32_opt.csv', 'arxiv_fp32_dyn2.csv')
+        pro_dyn = dyn_stats('products_fp32_opt.csv', 'products_fp32_dyn.csv')
+        name_map = {'Int4-C0': 'C0', 'Int4-C1': 'C1', 'Int4-C2': 'C2', 'Int4-C3': 'C3',
+                    'Int4-DynCache': 'DynCache', 'Int4-DynNoSplit': 'DynNoSplit',
+                    'Int4-DynNoCache': 'DynNoCache'}
+        def get4(rows, method, f):   # INT4 CSV: kernel_ms is column 6
+            for r in rows:
+                if r[5] == method and int(r[4]) == f:
+                    return float(r[6])
+            return None
+        def icollect(rows, w, dyn):
+            pts = []
+            for f in sorted({int(r[4]) for r in rows}):
+                for m2, m1 in name_map.items():
+                    t = get4(rows, m2, f)
+                    if t is None: continue
+                    if m1.startswith('Dyn'):
+                        st = dyn.get(m1 == 'DynNoSplit' and 'dyn-nosplit:' or 'dyn:')
+                        pts.append((m1, f, point(w, m1, f,
+                                                 st['tasks'] if st else None,
+                                                 st['max_task_tiles'] if st else None), t))
+                    else:
+                        pts.append((m1, f, point(w, m1, f), t))
+            return pts
+        probe = dict(arxiv=5.12e-9, products=6.72e-9)
+        for name, w, rows, dyn in (('arxiv', ARX, arx_rows, arx_dyn), ('products', PRO, pro_rows, pro_dyn)):
+            pts = icollect(rows, w, dyn)
+            cal = [pt for pt in pts if pt[1] == 128]
+            X = np.array([residual_features(fe) for _, _, fe, _ in cal])
+            y = np.array([m - probe[name] * fe['atomic'] for _, _, fe, m in cal])
+            coef, *_ = np.linalg.lstsq(X, y, rcond=None)
+            print(f'== INT4 recalibration on {name} (F=128 suite, n={len(cal)})')
+            print(f'   probe atomic rate b = {probe[name]:.3e} ms/atomic (unchanged)')
+            print(f'   residual coef [compute/P, tail, cache/SW, cta/P, base] =',
+                  [f'{c:.4e}' for c in coef])
+            report(coef, probe[name], pts, name)
+            print()
+        _s.exit(0)
     main()

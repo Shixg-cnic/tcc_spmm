@@ -96,3 +96,9 @@ target_include_directories(column_fast_test PRIVATE ${CMAKE_SOURCE_DIR}/tests)
 target_compile_options(column_fast_test PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-O3>)
 target_link_libraries(column_fast_test PRIVATE tcc_spmm)
 add_test(NAME column_fast_correctness COMMAND column_fast_test)
+
+# Batch 3, scheme A: bounded partial results + per-row reduction (two-phase).
+add_executable(column_partial_reduce bench/column_partial_reduce.cu)
+target_include_directories(column_partial_reduce PRIVATE ${CMAKE_SOURCE_DIR}/tests)
+target_compile_options(column_partial_reduce PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-O3>)
+target_link_libraries(column_partial_reduce PRIVATE tcc_spmm)

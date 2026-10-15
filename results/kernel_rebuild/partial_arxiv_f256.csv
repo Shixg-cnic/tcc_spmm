@@ -1,0 +1,7 @@
+# layout rows=169343 pairs=2462547 partial_bytes=0.157603GB
+correctness: rmse=8.73456e-07 maxAbs=0.0232658 maxRef=12478.6 -> OK
+pass1_ms,27.6971645,27.6692867,27.7459965
+pass2_ms,48.4963837,48.4881477,48.5105171
+total_ms,75.8532562,75.8230515,75.9258347
+dataset,M,K,nnz,F,scheme,partial_gb
+../data/ogbn_arxiv_full.csr,169343,169343,2484941,256,partial_reduce_fb16,0.157603008

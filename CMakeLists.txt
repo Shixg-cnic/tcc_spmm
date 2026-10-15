@@ -81,3 +81,10 @@ add_executable(atomic_probe bench/atomic_probe.cu)
 target_include_directories(atomic_probe PRIVATE ${CMAKE_SOURCE_DIR}/tests)
 target_compile_options(atomic_probe PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-O3>)
 target_link_libraries(atomic_probe PRIVATE tcc_spmm)
+
+# Output-path diagnosis (task-book batch 1): D0 reference C0, D1 no-writeback,
+# D1b non-atomic store, D2 atomic-only same-address-stream, D3 offline analysis.
+add_executable(column_output_diagnosis bench/column_output_diagnosis.cu)
+target_include_directories(column_output_diagnosis PRIVATE ${CMAKE_SOURCE_DIR}/tests ${CMAKE_SOURCE_DIR}/include)
+target_compile_options(column_output_diagnosis PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-O3>)
+target_link_libraries(column_output_diagnosis PRIVATE tcc_spmm)

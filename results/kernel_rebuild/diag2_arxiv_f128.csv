@@ -1,0 +1,12 @@
+# column_output_diagnosis dataset=../data/ogbn_arxiv_full.csr M=169343 K=169343 nnz=2484941 F=128 sw=16 groups=3 ctas=21168
+diagnostic,kernel_ms,min,max,note
+D0-C0,2.645504,2.62508154,2.65112948,sampled-max-abs-err=4.76837158e-06
+D1-no-writeback,1.85697913,1.85528314,1.86810243,checksum-keeps-address-chain
+D1b-non-atomic-store,2.05368328,2.03262711,2.06216955,diagnostic-only
+D2-atomic-strong,2.32150412,2.31580782,2.32580471,REDG.STRONG-const-value
+D2c-atomic-contiguous,0.721945643,0.721471965,0.722604811,L2-resident-scratch-logical-ops=315206016
+# D3 tiles=317064 rows_with_updates=169343 logical_atomics=315206016
+# D3 row-CW-contention p50/p95/p99/max=7/40/106/8976 mean=14.5418
+# D3 row-tile-updates mean/max=14.5418/8976
+# D3 CW-index-spread-per-row mean/max=15065.1/21167
+# D3 rows_with_>=2_CWs=169343 rows_with_>=16_CWs=41327 Y_working_set_MB=82.687

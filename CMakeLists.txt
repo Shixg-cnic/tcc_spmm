@@ -23,7 +23,9 @@ add_library(tcc_spmm STATIC
     src/format/row_convert.cpp
     src/kernel/row_spmm.cu
     src/format/column_convert.cpp
-    src/kernel/column_spmm.cu)
+    src/kernel/column_spmm.cu
+    src/format/column_schedule.cpp
+    src/kernel/column_adaptive.cu)
 set(TCC_SW_SIZE 16 CACHE STRING "Default Column SuperWindow size")
 set(TCC_CACHE_SIZE 32 CACHE STRING "Column cached rows per SuperWindow")
 target_compile_definitions(tcc_spmm PUBLIC TCC_SW_SIZE=${TCC_SW_SIZE} TCC_CACHE_SIZE=${TCC_CACHE_SIZE})
@@ -42,6 +44,10 @@ add_executable(column_spmm_test tests/column_spmm_test.cu)
 target_compile_options(column_spmm_test PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-O3>)
 target_link_libraries(column_spmm_test PRIVATE tcc_spmm)
 add_test(NAME column_spmm_correctness COMMAND column_spmm_test)
+add_executable(adaptive_sw_test tests/adaptive_sw_test.cu)
+target_compile_options(adaptive_sw_test PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-O3>)
+target_link_libraries(adaptive_sw_test PRIVATE tcc_spmm)
+add_test(NAME adaptive_sw_correctness COMMAND adaptive_sw_test)
 add_executable(compare_row_column tests/compare_row_column.cu)
 target_compile_options(compare_row_column PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-O3>)
 target_link_libraries(compare_row_column PRIVATE tcc_spmm)

@@ -8,10 +8,6 @@
 namespace {
 using U = std::uint32_t;
 constexpr int WARPS = COLUMN_FEATURE_TILE/32;
-// C3 output cache row stride: pad 4 floats after every row so that lanes
-// writing the same feature of different rows hit different shared-memory
-// banks (128 floats per row would alias every row onto the same bank).
-constexpr U COLUMN_CACHE_STRIDE = COLUMN_FEATURE_TILE + 4;
 
 __device__ void loadX(const float* x, U w, U cols, U f, U features, float b[2][4]) {
     U lane=threadIdx.x%32, group=lane/4, k=lane%4;

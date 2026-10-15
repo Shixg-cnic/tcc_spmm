@@ -10,6 +10,9 @@
 constexpr std::uint32_t COLUMN_SW_SIZE = TCC_SW_SIZE;
 constexpr std::uint32_t COLUMN_CACHE_SIZE = TCC_CACHE_SIZE;
 constexpr std::uint32_t COLUMN_FEATURE_TILE = 128;
+// C3/adaptive output cache row stride: pad 4 floats after every row so that
+// lanes writing the same feature of different rows hit different banks.
+constexpr std::uint32_t COLUMN_CACHE_STRIDE = COLUMN_FEATURE_TILE + 4;
 static_assert(TCC_SW_SIZE > 0 && TCC_CACHE_SIZE > 0);
 static_assert(std::uint64_t(COLUMN_CACHE_SIZE)*COLUMN_FEATURE_TILE <= UINT32_MAX);
 

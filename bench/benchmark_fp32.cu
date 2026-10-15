@@ -12,6 +12,7 @@
 //   - empty 8-row windows are unsupported (verified absent on the target graphs).
 #include "matrix_io.cuh"
 #include "acc_reference.cuh"
+#include "column_schedule.cuh"
 #include <iomanip>
 #include <memory>
 
@@ -138,10 +139,20 @@ struct Formats {
     RowBitTCF row;
     RowBitTCF acc;          // original Acc METCFBit, verified equal to row
     ColumnSWTCF column;
+    ColumnBaseFormat columnBase;
+    ColumnSchedule schedDyn, schedNoSplit;
+    ColumnAdaptiveFormat adaptiveDyn, adaptiveNoSplit;
     std::size_t columnBaseBytes = 0;
-    double rowConvertMs, accConvertMs, colConvertMs;
-    std::size_t rowBytes, accBytes, columnBytes;
+    double rowConvertMs, accConvertMs, colConvertMs, adaptiveConvertMs;
+    std::size_t rowBytes, accBytes, columnBytes, adaptiveBytes;
 };
+
+std::size_t adaptiveBytes(const ColumnAdaptiveFormat& m) {
+    return 4 * (m.colWindowOffset.size() + m.tileRowSlot.size() + m.tileValueOffset.size() + m.values.size() +
+                m.swRowOffset.size() + m.swRows.size() + m.swRowCacheSlot.size() +
+                m.swCachedRowSlot.size() + m.swCachedCount.size() + m.tasks.size()) +
+           8 * m.tileLocalBit.size();
+}
 
 Formats buildFormats(const Matrix& m, unsigned swSize) {
     Formats f;
@@ -154,8 +165,48 @@ Formats buildFormats(const Matrix& m, unsigned swSize) {
         throw std::runtime_error("original Acc format differs from local Row format");
     f.rowBytes = rowBytes(f.row); f.accBytes = f.rowBytes; f.columnBytes = columnBytes(f.column);
     f.columnBaseBytes = columnBytesBase(f.column);
+    t0 = Clock::now();
+    f.columnBase = buildColumnBase(m.rows, m.cols, m.csr);
+    f.schedDyn = buildAdaptiveSchedule(f.columnBase, ScheduleConfig{});
+    f.adaptiveDyn = buildAdaptiveColumn(f.columnBase, f.schedDyn);
+    ScheduleConfig noSplit;
+    noSplit.splitTileThreshold = UINT32_MAX;
+    f.schedNoSplit = buildAdaptiveSchedule(f.columnBase, noSplit);
+    f.adaptiveNoSplit = buildAdaptiveColumn(f.columnBase, f.schedNoSplit);
+    f.adaptiveConvertMs = elapsed(t0);
+    f.adaptiveBytes = adaptiveBytes(f.adaptiveDyn);
     return f;
 }
+
+// Uploaded adaptive formats (both schedules) with their GPU views.
+struct GPUAdaptivePair {
+    Buffer<std::uint32_t> dynWindows, dynSlots, dynOffset, dynSwOffset, dynRows, dynCacheSlots, dynCachedRows, dynCounts;
+    Buffer<std::uint64_t> dynBits;
+    Buffer<float> dynValues;
+    Buffer<SWTask> dynTasks;
+    Buffer<std::uint32_t> nsWindows, nsSlots, nsOffset, nsSwOffset, nsRows, nsCacheSlots, nsCachedRows, nsCounts;
+    Buffer<std::uint64_t> nsBits;
+    Buffer<float> nsValues;
+    Buffer<SWTask> nsTasks;
+    DeviceColumnAdaptive viewDyn, viewNoSplit;
+    explicit GPUAdaptivePair(const Formats& f)
+        : dynWindows(f.adaptiveDyn.colWindowOffset), dynSlots(f.adaptiveDyn.tileRowSlot),
+          dynOffset(f.adaptiveDyn.tileValueOffset), dynSwOffset(f.adaptiveDyn.swRowOffset),
+          dynRows(f.adaptiveDyn.swRows), dynCacheSlots(f.adaptiveDyn.swRowCacheSlot),
+          dynCachedRows(f.adaptiveDyn.swCachedRowSlot), dynCounts(f.adaptiveDyn.swCachedCount),
+          dynBits(f.adaptiveDyn.tileLocalBit), dynValues(f.adaptiveDyn.values), dynTasks(f.adaptiveDyn.tasks),
+          nsWindows(f.adaptiveNoSplit.colWindowOffset), nsSlots(f.adaptiveNoSplit.tileRowSlot),
+          nsOffset(f.adaptiveNoSplit.tileValueOffset), nsSwOffset(f.adaptiveNoSplit.swRowOffset),
+          nsRows(f.adaptiveNoSplit.swRows), nsCacheSlots(f.adaptiveNoSplit.swRowCacheSlot),
+          nsCachedRows(f.adaptiveNoSplit.swCachedRowSlot), nsCounts(f.adaptiveNoSplit.swCachedCount),
+          nsBits(f.adaptiveNoSplit.tileLocalBit), nsValues(f.adaptiveNoSplit.values), nsTasks(f.adaptiveNoSplit.tasks),
+          viewDyn{f.adaptiveDyn.rows, f.adaptiveDyn.cols, uint32_t(f.adaptiveDyn.tasks.size()),
+              dynWindows.data, dynSlots.data, dynOffset.data, dynBits.data, dynValues.data,
+              dynSwOffset.data, dynRows.data, dynCacheSlots.data, dynCachedRows.data, dynCounts.data, dynTasks.data},
+          viewNoSplit{f.adaptiveNoSplit.rows, f.adaptiveNoSplit.cols, uint32_t(f.adaptiveNoSplit.tasks.size()),
+              nsWindows.data, nsSlots.data, nsOffset.data, nsBits.data, nsValues.data,
+              nsSwOffset.data, nsRows.data, nsCacheSlots.data, nsCachedRows.data, nsCounts.data, nsTasks.data} {}
+};
 
 const char* methodName(int method) {
     switch (method) {
@@ -165,8 +216,73 @@ const char* methodName(int method) {
         case 3: return "C1";
         case 4: return "C2";
         case 5: return "C3";
+        case 6: return "DynCache";
+        case 7: return "DynNoSplit";
+        case 8: return "DynNoCache";
     }
     return "?";
+}
+
+// Per-method (format-bytes, conversion-ms, upload) helper for the CSV row.
+struct MethodMeta { std::size_t bytes; double convertMs; };
+
+// Aggregate schedule statistics used by the calibrated cost model (3.6):
+// tiles, (CW,row) occurrences, atomics before/after the SW cache, per-task
+// tile distribution.
+struct ScheduleStats {
+    std::uint64_t tasks = 0, tiles = 0, occurrences = 0;
+    std::uint64_t atomicBefore = 0, atomicAfter = 0;
+    std::uint64_t maxTaskTiles = 0, meanTaskTiles100 = 0, p99TaskTiles = 0;
+};
+ScheduleStats scheduleStats(const ColumnBaseFormat& base, const ColumnSchedule& sched, unsigned f) {
+    ScheduleStats s;
+    s.tasks = sched.tasks.size();
+    std::vector<std::uint64_t> perTask;
+    for (auto& t : sched.tasks) {
+        std::uint64_t tiles = 0;
+        for (auto cw = t.cwBegin; cw < t.cwEnd; ++cw) {
+            auto lo = std::max<std::uint64_t>(t.tileBegin, base.colWindowOffset[cw]);
+            auto hi = std::min<std::uint64_t>(t.tileEnd, base.colWindowOffset[cw+1]);
+            tiles += hi > lo ? hi - lo : 0;
+        }
+        perTask.push_back(tiles);
+    }
+    std::sort(perTask.begin(), perTask.end());
+    for (auto v : perTask) s.tiles += v;
+    for (std::uint64_t i = 0; i + 1 < base.colWindowOffset.size(); ++i) {
+        std::uint64_t lo = base.colWindowOffset[i], hi = base.colWindowOffset[i+1];
+        std::vector<std::uint32_t> rows;
+        for (auto t = lo; t < hi; ++t)
+            for (unsigned r = 0; r < 8; ++r)
+                if (base.tileRows[std::size_t(t)*8+r] != UINT32_MAX) rows.push_back(base.tileRows[std::size_t(t)*8+r]);
+        std::sort(rows.begin(), rows.end());
+        rows.erase(std::unique(rows.begin(), rows.end()), rows.end());
+        s.occurrences += rows.size();
+    }
+    s.atomicBefore = s.occurrences * f;
+    s.atomicAfter = s.atomicBefore;
+    for (std::uint32_t sw = 0; sw < sched.swCachedCount.size(); ++sw) {
+        std::uint64_t saved = 0;
+        if (sw < sched.tasks.size()) {
+            auto& t = sched.tasks[sw];
+            std::unordered_map<std::uint32_t, unsigned> freq;
+            for (auto cw = t.cwBegin; cw < t.cwEnd; ++cw)
+                for (auto tile = std::max<std::uint64_t>(t.tileBegin, base.colWindowOffset[cw]);
+                     tile < std::min<std::uint64_t>(t.tileEnd, base.colWindowOffset[cw+1]); ++tile)
+                    for (unsigned r = 0; r < 8; ++r) {
+                        auto row = base.tileRows[std::size_t(tile)*8+r];
+                        if (row != UINT32_MAX) ++freq[row];
+                    }
+            for (auto& [r, c] : freq) if (c > 1) saved += (c - 1);
+        }
+        s.atomicAfter -= saved * f;
+    }
+    if (!perTask.empty()) {
+        s.maxTaskTiles = perTask.back();
+        s.meanTaskTiles100 = std::uint64_t(100.0 * double(s.tiles) / perTask.size());
+        s.p99TaskTiles = perTask[std::size_t(0.99 * (perTask.size()-1))];
+    }
+    return s;
 }
 
 } // namespace
@@ -195,6 +311,7 @@ int main(int argc, char** argv) {
         check(cudaDeviceSynchronize());
         auto t0 = Clock::now();
         GPUColumn gc(formats.column); GPURow gr(formats.row);
+        GPUAdaptivePair gp(formats);
         Buffer<std::uint64_t> accBits(formats.acc.tcLocalBit);
         Buffer<std::uint32_t> accWindow(formats.acc.rowWindowOffset), accOffset(formats.acc.tcOffset),
             accMapping(formats.acc.sparseA2B);
@@ -208,6 +325,17 @@ int main(int argc, char** argv) {
                   << " cache=" << COLUMN_CACHE_SIZE << " feature_tile=" << COLUMN_FEATURE_TILE
                   << " groups=" << groups << " padded_rows=" << paddedRows << '\n';
         std::cout << "# Acc constraints: F in [64,512] and F%32==0; rows padded to 8; no empty 8-row windows.\n";
+        for (int v = 0; v < 2; ++v) {
+            auto st = scheduleStats(formats.columnBase, v ? formats.schedNoSplit : formats.schedDyn, 128);
+            std::cout << "# dyn" << (v ? "-nosplit" : "") << ": tasks=" << st.tasks << " tiles=" << st.tiles
+                      << " occurrences=" << st.occurrences << " atomic_before=" << st.atomicBefore
+                      << " atomic_after=" << st.atomicAfter << " saved=" << (st.atomicBefore - st.atomicAfter)
+                      << " max_task_tiles=" << st.maxTaskTiles << " mean=" << (st.meanTaskTiles100/100.0)
+                      << " p99=" << st.p99TaskTiles << '\n';
+        }
+        std::cout << "# dynamic schedule: tasks_dyn=" << formats.adaptiveDyn.tasks.size()
+                  << " split_chunks_dyn=" << formats.schedDyn.splitChunks
+                  << " tasks_nosplit=" << formats.adaptiveNoSplit.tasks.size() << '\n';
         std::cout << "dataset,M,K,nnz,F,method,format_bytes,format_conversion_ms,upload_ms,kernel_ms,"
                      "kernel_min,kernel_max,output_clear_ms,complete_spmm_ms,complete_min,complete_max,"
                      "relative_rmse,max_absolute_error,rmse_vs_row,max_abs_vs_row\n";
@@ -225,13 +353,17 @@ int main(int argc, char** argv) {
             std::cout << "# dataset=" << dataset << " M=" << m.rows << " K=" << m.cols << " nnz=" << m.csr.src.size()
                       << " F=" << f << '\n';
 
-            for (int method = 0; method < 6; ++method) {
+            for (int method = 0; method < 9; ++method) {
                 const bool acc = method == 0;
                 if (acc && (f < 64 || f % 32)) {
                     std::cout << "# Acc-Original skipped for F=" << f << " (constraint F in [64,512], F%32==0)\n";
                     continue;
                 }
                 const bool rowMethod = method == 1;
+                const bool columnMethod = method >= 2 && method <= 5;
+                const bool adaptiveMethod = method >= 6;
+                const DeviceColumnAdaptive* dynView = method == 6 || method == 8 ? &gp.viewDyn : &gp.viewNoSplit;
+                const bool dynCache = method == 6 || method == 7;
                 std::size_t yCount = (acc ? std::size_t(paddedRows) : std::size_t(m.rows)) * f;
                 Buffer<float> y(yCount);
                 // --- correctness run ---
@@ -240,8 +372,10 @@ int main(int argc, char** argv) {
                         accValues.data, input.data, y.data, paddedRows, m.cols, f, stream));
                 } else if (rowMethod) {
                     gr.launch(input.data, y.data, f, stream);
-                } else {
+                } else if (columnMethod) {
                     check(launchColumnSpMM(gc.view, input.data, y.data, f, ColumnVersion(method - 2), stream));
+                } else {
+                    check(launchColumnAdaptiveSpMM(*dynView, input.data, y.data, f, dynCache, stream));
                 }
                 auto yHost = y.host(stream);
                 std::vector<float> valid(yHost.begin(), yHost.begin() + std::size_t(m.rows) * f);
@@ -260,7 +394,7 @@ int main(int argc, char** argv) {
                     cstat = measureGraph(launch, repeat, groups, 3, stream);
                     kernelMs = cstat.med; completeMs = cstat.med;
                     kstat = cstat;
-                } else {
+                } else if (columnMethod) {
                     auto launch = [&]() { check(launchColumnSpMM(gc.view, input.data, y.data, f,
                         ColumnVersion(method - 2), stream, false)); };
                     auto pair = measureColumn(launch, y.data, yCount * sizeof(float), repeat, groups, 3, stream);
@@ -268,13 +402,22 @@ int main(int argc, char** argv) {
                     auto clear = [&]() { check(cudaMemsetAsync(y.data, 0, yCount * sizeof(float), stream)); };
                     clearStat = measureGraph(clear, repeat, groups, 3, stream);
                     kernelMs = kstat.med; clearMs = clearStat.med; completeMs = cstat.med;
+                } else {
+                    auto launch = [&]() { check(launchColumnAdaptiveSpMM(*dynView, input.data, y.data, f,
+                        dynCache, stream, false)); };
+                    auto pair = measureColumn(launch, y.data, yCount * sizeof(float), repeat, groups, 3, stream);
+                    kstat = pair.kernel; cstat = pair.complete;
+                    auto clear = [&]() { check(cudaMemsetAsync(y.data, 0, yCount * sizeof(float), stream)); };
+                    clearStat = measureGraph(clear, repeat, groups, 3, stream);
+                    kernelMs = kstat.med; clearMs = clearStat.med; completeMs = cstat.med;
                 }
-                std::size_t formatBytes = acc ? formats.accBytes
-                    : (rowMethod ? formats.rowBytes
-                        : (method == 5 ? formats.columnBytes : formats.columnBaseBytes));
-                double convertMs = acc ? formats.accConvertMs : (rowMethod ? formats.rowConvertMs : formats.colConvertMs);
+                MethodMeta meta;
+                if (acc) meta = {formats.accBytes, formats.accConvertMs};
+                else if (rowMethod) meta = {formats.rowBytes, formats.rowConvertMs};
+                else if (adaptiveMethod) meta = {formats.adaptiveBytes, formats.adaptiveConvertMs};
+                else meta = {method == 5 ? formats.columnBytes : formats.columnBaseBytes, formats.colConvertMs};
                 std::cout << dataset << ',' << m.rows << ',' << m.cols << ',' << m.csr.src.size() << ',' << f << ','
-                          << methodName(method) << ',' << formatBytes << ',' << convertMs << ',' << uploadMs << ','
+                          << methodName(method) << ',' << meta.bytes << ',' << meta.convertMs << ',' << uploadMs << ','
                           << kernelMs << ',' << kstat.mn << ',' << kstat.mx << ',' << clearMs << ',' << completeMs << ','
                           << cstat.mn << ',' << cstat.mx << ',' << cpu.rmse << ',' << cpu.maxAbsolute << ','
                           << vsRow.rmse << ',' << vsRow.maxAbsolute << '\n' << std::flush;

@@ -10,6 +10,11 @@ Row-BitTCF 将连续 8 个目标行分组，窗口内源列压缩为 8×8 bitmap
 
 Column-SWTCF 将连续 8 个输入列分组，按原始目标行编号压缩为 8×8 Tile，默认每 16 个列窗口组成 SuperWindow。所有版本支持实际 FP32 权重，复用窗口内的 X，使用 TF32 MMA，并通过全局原子累加输出。
 
+自适应变体（M3）：column_adaptive.cu 按任务表驱动，grid.x = 任务数；任务由
+uildAdaptiveSchedule 的确定性启发式生成（重 CW 拆分为 256-tile chunk，
+轻 CW 按复用收益贪心分组），支持 C2/C3 风格缓存开关。调度统计与
+可校准性能模型见 ench/model_calibration.py。
+
 | 版本 | CTA 任务 | 稀疏 Tile 流水线 | 重复输出行缓存 |
 | --- | --- | --- | --- |
 | C0 | Column Window × 128 特征 | 同步加载 | 关闭 |
@@ -24,21 +29,24 @@ tcc_spmm/
 │   ├── csr.cuh               # CanonicalCSR 公共定义（Row/Column 共享）
 │   ├── row_format.cuh
 │   ├── column_format.cuh
+│   ├── column_schedule.cuh   # 动态 SW 调度（任务表/自适应格式）
 │   ├── mma_tf32.cuh
 │   └── pipeline.cuh
 ├── src/
-│   ├── format/               # csr / Row / Column CPU 转换
-│   └── kernel/               # Row / Column FP32 Tensor Core 算子
+│   ├── format/               # csr / Row / Column CPU 转换（含 column_schedule.cpp）
+│   └── kernel/               # Row / Column FP32 Tensor Core 算子（含 column_adaptive.cu）
 ├── tests/
 │   ├── row_spmm_test.cu       # 原生正确性与计时入口
 │   ├── column_spmm_test.cu    # C0–C3 正确性、格式解码、Graph 重放
 │   ├── compare_row_column.cu # 同输入性能比较
+│   ├── adaptive_sw_test.cu   # 动态调度正确性/覆盖率 + 4 配置 x 11 个 F
 │   ├── column_test_utils.cuh
 │   ├── matrix_io.cuh
 │   ├── acc_reference.cuh
 │   └── acc_reference.cu      # 原始 Acc Row 对照
 ├── bench/
-│   └── benchmark_fp32.cu     # 统一 FP32 基线：Acc 原始 + Row + C0–C3
+│   ├── benchmark_fp32.cu     # 统一 FP32 基线：Acc 原始 + Row + C0–C3 + Dyn*
+│   └── model_calibration.py  # 可校准性能模型（3.6）
 ├── third_party/Acc-SpMM/     # 原始源码与 License
 └── results/                 # 实测报告及原始记录（baseline/adaptive/int4）
 ```
@@ -70,6 +78,7 @@ make -j
 ./compare_row_column matrix.mtx 128 30 0 X.bin
 
 # 统一 FP32 基线：Acc 原始 tf32_mma_kernel + Row + C0/C1/C2/C3
+# + DynCache/DynNoSplit/DynNoCache（方法 6-8）
 # all 包含 F=32/64/100/128/256/512；groups>=3 组独立 Graph 测量
 ./benchmark_fp32 matrix.csr all 3 0 X.bin
 ./benchmark_fp32 matrix.csr 128 3 0 X.bin
@@ -109,3 +118,6 @@ launchColumnSpMM(deviceColumn, deviceX, deviceY, F, ColumnVersion::C3, stream);
 第二阶段实现及同输入数据见 [Column FP32 报告](results/column_fp32.md)。该阶段发现并修复了 Row 首次映射缓冲的跨 Warp 竞争，新增一次计算前同步；第三方源码保持原样，历史 Row 数据保留。下一阶段再设计融合反量化。
 
 第三阶段基线（Acc 原始 + Row + C0–C3 统一计时）见 [results/baseline/baseline_fp32.md](results/baseline/baseline_fp32.md)。
+M2 列优化分析见 [results/baseline/column_fp32_optimized.md](results/baseline/column_fp32_optimized.md)。
+M3 动态 SuperWindow 调度及模型见 [results/baseline/column_fp32_dynamic.md](results/baseline/column_fp32_dynamic.md)
+与 [docs/design.md](docs/design.md)。

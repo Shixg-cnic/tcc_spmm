@@ -31,6 +31,23 @@ __device__ void fastLoadX(const float* x, U w, U cols, U f, U features, float b[
         }
 }
 
+// Fused INT4 X loader (batch 4): same indexing as fastLoadX but reads the
+// packed stream and dequantises q*scale in registers.
+__device__ void fastLoadXInt4(const DeviceInt4X* x, U w, U cols, U f, U features, float b[2][4]) {
+    U lane = threadIdx.x % 32, group = lane / 4, k = lane % 4;
+    #pragma unroll
+    for (int part = 0; part < 2; ++part)
+        #pragma unroll
+        for (int i = 0; i < 4; ++i) {
+            U col = w * 8 + k + (i >= 2 ? 4 : 0);
+            U feature = f + group + (i % 2) * 8 + part * 16;
+            float v = 0.f;
+            if (col < cols && feature < features)
+                v = int4ToFloat(nibbleAt(x->q, packedByteIndex(col, feature, features), feature), x->scale[col]);
+            b[part][i] = v;
+        }
+}
+
 // Emit the atomic updates of one MMA part (16 features x 8 rows, per-lane
 // fragment c[4]). WIDE=1: 4 scalar REDG. WIDE=2: reshuffle to float2 pairs.
 // WIDE=4: reshuffle to float4 quads (one per lane).
@@ -97,8 +114,9 @@ __device__ __forceinline__ void emitFast(const float c[4], const U* rows, float*
 }
 
 // Core fast kernel: WIDE in {1,2,4}, internal feature tile FTILE.
-template<int WIDE, int FTILE>
-__global__ void fastKernel(DeviceColumnFast m, const float* x, float* y, U features) {
+// Int4: X loaded fused from the packed INT4 stream (see fastLoadXInt4).
+template<int WIDE, int FTILE, bool Int4 = false>
+__global__ void fastKernel(DeviceColumnFast m, const void* x, float* y, U features) {
     constexpr int WARPS = FTILE / 32;
     __shared__ float a[64];
     __shared__ U rows[8];
@@ -107,7 +125,10 @@ __global__ void fastKernel(DeviceColumnFast m, const float* x, float* y, U featu
     const U fBase = blockIdx.y * FTILE + (threadIdx.x / 32) * 32;
     const U lane = threadIdx.x % 32, group = lane / 4, k = lane % 4;
     float b[2][4];
-    fastLoadX(x, w, m.cols, fBase, features, b);
+    if constexpr (Int4)
+        fastLoadXInt4(static_cast<const DeviceInt4X*>(x), w, m.cols, fBase, features, b);
+    else
+        fastLoadX(static_cast<const float*>(x), w, m.cols, fBase, features, b);
     const U first = m.colWindowOffset[w], end = m.colWindowOffset[w + 1];
     for (U tile = first; tile < end; ++tile) {
         for (U i = threadIdx.x; i < 64; i += blockDim.x) {
@@ -130,8 +151,8 @@ __global__ void fastKernel(DeviceColumnFast m, const float* x, float* y, U featu
 
 // V3: tile pipeline with cp.async (values staged asynchronously, rows via
 // plain smem stores). Stages = 2 or 4. WIDE selects the atomic width.
-template<int Stages, int WIDE = 1>
-__global__ void fastPipeKernel(DeviceColumnFast m, const float* x, float* y, U features) {
+template<int Stages, int WIDE = 1, bool Int4 = false>
+__global__ void fastPipeKernel(DeviceColumnFast m, const void* x, float* y, U features) {
     __shared__ float a[Stages][64];
     __shared__ U rows[Stages][8];
     const U windows = (std::uint64_t(m.cols) + 7) / 8;
@@ -139,7 +160,10 @@ __global__ void fastPipeKernel(DeviceColumnFast m, const float* x, float* y, U f
     const U fBase = blockIdx.y * 128 + (threadIdx.x / 32) * 32;
     const U lane = threadIdx.x % 32, group = lane / 4, k = lane % 4;
     float b[2][4];
-    fastLoadX(x, w, m.cols, fBase, features, b);
+    if constexpr (Int4)
+        fastLoadXInt4(static_cast<const DeviceInt4X*>(x), w, m.cols, fBase, features, b);
+    else
+        fastLoadX(static_cast<const float*>(x), w, m.cols, fBase, features, b);
     const U first = m.colWindowOffset[w], end = m.colWindowOffset[w + 1];
     const U count = end - first;
     auto stage = [&](U tile, int buf) {
@@ -171,13 +195,14 @@ __global__ void fastPipeKernel(DeviceColumnFast m, const float* x, float* y, U f
     }
 }
 
-template<int WIDE, int FTILE>
-void launchFast(dim3 grid, DeviceColumnFast m, const float* x, float* y,
+template<int WIDE, int FTILE, bool Int4 = false>
+void launchFast(dim3 grid, DeviceColumnFast m, const void* x, float* y,
     U features, cudaStream_t stream) {
-    fastKernel<WIDE, FTILE><<<grid, FTILE / 32 * 32, 0, stream>>>(m, x, y, features);
+    fastKernel<WIDE, FTILE, Int4><<<grid, FTILE / 32 * 32, 0, stream>>>(m, x, y, features);
 }
 
-cudaError_t launchImpl(const DeviceColumnFast& m, const float* x, float* y,
+template<bool Int4>
+cudaError_t launchImpl(const DeviceColumnFast& m, const void* x, float* y,
     U features, FastVariant variant, U ftile, U stages, cudaStream_t stream, bool clear) {
     const U windows = (std::uint64_t(m.cols) + 7) / 8;
     if (clear) {
@@ -188,36 +213,36 @@ cudaError_t launchImpl(const DeviceColumnFast& m, const float* x, float* y,
     dim3 grid(windows, features / ftile);
     switch (variant) {
         case FAST_V1:
-            if (ftile == 128) launchFast<1, 128>(grid, m, x, y, features, stream);
-            else if (ftile == 256) launchFast<1, 256>(grid, m, x, y, features, stream);
-            else if (ftile == 64) launchFast<1, 64>(grid, m, x, y, features, stream);
-            else launchFast<1, 32>(grid, m, x, y, features, stream);
+            if (ftile == 128) launchFast<1, 128, Int4>(grid, m, x, y, features, stream);
+            else if (ftile == 256) launchFast<1, 256, Int4>(grid, m, x, y, features, stream);
+            else if (ftile == 64) launchFast<1, 64, Int4>(grid, m, x, y, features, stream);
+            else launchFast<1, 32, Int4>(grid, m, x, y, features, stream);
             break;
         case FAST_V2A:
-            launchFast<1, 128>(grid, m, x, y, features, stream);
+            launchFast<1, 128, Int4>(grid, m, x, y, features, stream);
             break;
         case FAST_V2B:
-            launchFast<2, 128>(grid, m, x, y, features, stream);
+            launchFast<2, 128, Int4>(grid, m, x, y, features, stream);
             break;
         case FAST_V2C:
-            if (ftile == 64) launchFast<4, 64>(grid, m, x, y, features, stream);
-            else if (ftile == 32) launchFast<4, 32>(grid, m, x, y, features, stream);
-            else if (ftile == 256) launchFast<4, 256>(grid, m, x, y, features, stream);
-            else launchFast<4, 128>(grid, m, x, y, features, stream);
+            if (ftile == 64) launchFast<4, 64, Int4>(grid, m, x, y, features, stream);
+            else if (ftile == 32) launchFast<4, 32, Int4>(grid, m, x, y, features, stream);
+            else if (ftile == 256) launchFast<4, 256, Int4>(grid, m, x, y, features, stream);
+            else launchFast<4, 128, Int4>(grid, m, x, y, features, stream);
             break;
         case FAST_V4:
-            if (ftile == 256) launchFast<1, 256>(grid, m, x, y, features, stream);
-            else if (ftile == 64) launchFast<1, 64>(grid, m, x, y, features, stream);
-            else if (ftile == 32) launchFast<1, 32>(grid, m, x, y, features, stream);
-            else launchFast<1, 128>(grid, m, x, y, features, stream);
+            if (ftile == 256) launchFast<1, 256, Int4>(grid, m, x, y, features, stream);
+            else if (ftile == 64) launchFast<1, 64, Int4>(grid, m, x, y, features, stream);
+            else if (ftile == 32) launchFast<1, 32, Int4>(grid, m, x, y, features, stream);
+            else launchFast<1, 128, Int4>(grid, m, x, y, features, stream);
             break;
         case FAST_V3W:
-            if (stages == 4) fastPipeKernel<4, 2><<<grid, 128, 0, stream>>>(m, x, y, features);
-            else fastPipeKernel<2, 2><<<grid, 128, 0, stream>>>(m, x, y, features);
+            if (stages == 4) fastPipeKernel<4, 2, Int4><<<grid, 128, 0, stream>>>(m, x, y, features);
+            else fastPipeKernel<2, 2, Int4><<<grid, 128, 0, stream>>>(m, x, y, features);
             break;
         case FAST_V3:
-            if (stages == 4) fastPipeKernel<4, 1><<<grid, 128, 0, stream>>>(m, x, y, features);
-            else fastPipeKernel<2, 1><<<grid, 128, 0, stream>>>(m, x, y, features);
+            if (stages == 4) fastPipeKernel<4, 1, Int4><<<grid, 128, 0, stream>>>(m, x, y, features);
+            else fastPipeKernel<2, 1, Int4><<<grid, 128, 0, stream>>>(m, x, y, features);
             break;
         default:
             return cudaErrorInvalidValue;
@@ -229,10 +254,18 @@ cudaError_t launchImpl(const DeviceColumnFast& m, const float* x, float* y,
 cudaError_t launchColumnFast(const DeviceColumnFast& matrix, const float* x, float* y,
     std::uint32_t features, FastVariant variant, std::uint32_t ftile,
     std::uint32_t stages, cudaStream_t stream, bool clearOutput) {
-    return launchImpl(matrix, x, y, features, variant, ftile, stages, stream, clearOutput);
+    return launchImpl<false>(matrix, x, y, features, variant, ftile, stages, stream, clearOutput);
 }
 
-cudaError_t columnFastAttributes(FastVariant variant, std::uint32_t ftile,
+cudaError_t launchColumnFastInt4(const DeviceColumnFast& matrix, const DeviceInt4X& x, float* y,
+    std::uint32_t features, FastVariant variant, std::uint32_t ftile,
+    std::uint32_t stages, cudaStream_t stream, bool clearOutput) {
+    return launchImpl<true>(matrix, &x, y, features, variant, ftile, stages, stream, clearOutput);
+}
+
+namespace {
+template<bool Int4>
+cudaError_t columnFastAttributesImpl(FastVariant variant, std::uint32_t ftile,
     std::uint32_t stages, ColumnFastInfo* info) {
     if (!info) return cudaErrorInvalidValue;
     auto fill = [&](const void* kernel, U threads, U dyn) {
@@ -245,28 +278,39 @@ cudaError_t columnFastAttributes(FastVariant variant, std::uint32_t ftile,
     };
     switch (variant) {
         case FAST_V1:
-            if (ftile == 256) return fill((const void*)fastKernel<1, 256>, 256, 0);
-            if (ftile == 64) return fill((const void*)fastKernel<1, 64>, 64, 0);
-            if (ftile == 32) return fill((const void*)fastKernel<1, 32>, 32, 0);
-            return fill((const void*)fastKernel<1, 128>, 128, 0);
-        case FAST_V2A: return fill((const void*)fastKernel<1, 128>, 128, 0);
-        case FAST_V2B: return fill((const void*)fastKernel<2, 128>, 128, 0);
+            if (ftile == 256) return fill((const void*)fastKernel<1, 256, Int4>, 256, 0);
+            if (ftile == 64) return fill((const void*)fastKernel<1, 64, Int4>, 64, 0);
+            if (ftile == 32) return fill((const void*)fastKernel<1, 32, Int4>, 32, 0);
+            return fill((const void*)fastKernel<1, 128, Int4>, 128, 0);
+        case FAST_V2A: return fill((const void*)fastKernel<1, 128, Int4>, 128, 0);
+        case FAST_V2B: return fill((const void*)fastKernel<2, 128, Int4>, 128, 0);
         case FAST_V2C:
-            if (ftile == 256) return fill((const void*)fastKernel<4, 256>, 256, 0);
-            if (ftile == 64) return fill((const void*)fastKernel<4, 64>, 64, 0);
-            if (ftile == 32) return fill((const void*)fastKernel<4, 32>, 32, 0);
-            return fill((const void*)fastKernel<4, 128>, 128, 0);
+            if (ftile == 256) return fill((const void*)fastKernel<4, 256, Int4>, 256, 0);
+            if (ftile == 64) return fill((const void*)fastKernel<4, 64, Int4>, 64, 0);
+            if (ftile == 32) return fill((const void*)fastKernel<4, 32, Int4>, 32, 0);
+            return fill((const void*)fastKernel<4, 128, Int4>, 128, 0);
         case FAST_V4:
-            if (ftile == 256) return fill((const void*)fastKernel<1, 256>, 256, 0);
-            if (ftile == 64) return fill((const void*)fastKernel<1, 64>, 64, 0);
-            if (ftile == 32) return fill((const void*)fastKernel<1, 32>, 32, 0);
-            return fill((const void*)fastKernel<1, 128>, 128, 0);
+            if (ftile == 256) return fill((const void*)fastKernel<1, 256, Int4>, 256, 0);
+            if (ftile == 64) return fill((const void*)fastKernel<1, 64, Int4>, 64, 0);
+            if (ftile == 32) return fill((const void*)fastKernel<1, 32, Int4>, 32, 0);
+            return fill((const void*)fastKernel<1, 128, Int4>, 128, 0);
         case FAST_V3W:
-            if (stages == 4) return fill((const void*)fastPipeKernel<4, 2>, 128, 0);
-            return fill((const void*)fastPipeKernel<2, 2>, 128, 0);
+            if (stages == 4) return fill((const void*)fastPipeKernel<4, 2, Int4>, 128, 0);
+            return fill((const void*)fastPipeKernel<2, 2, Int4>, 128, 0);
         case FAST_V3:
-            if (stages == 4) return fill((const void*)fastPipeKernel<4, 1>, 128, 0);
-            return fill((const void*)fastPipeKernel<2, 1>, 128, 0);
+            if (stages == 4) return fill((const void*)fastPipeKernel<4, 1, Int4>, 128, 0);
+            return fill((const void*)fastPipeKernel<2, 1, Int4>, 128, 0);
         default: return cudaErrorInvalidValue;
     }
+}
+} // namespace
+
+cudaError_t columnFastAttributes(FastVariant variant, std::uint32_t ftile,
+    std::uint32_t stages, ColumnFastInfo* info) {
+    return columnFastAttributesImpl<false>(variant, ftile, stages, info);
+}
+
+cudaError_t columnFastInt4Attributes(FastVariant variant, std::uint32_t ftile,
+    std::uint32_t stages, ColumnFastInfo* info) {
+    return columnFastAttributesImpl<true>(variant, ftile, stages, info);
 }

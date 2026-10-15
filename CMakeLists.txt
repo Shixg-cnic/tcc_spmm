@@ -102,3 +102,13 @@ add_executable(column_partial_reduce bench/column_partial_reduce.cu)
 target_include_directories(column_partial_reduce PRIVATE ${CMAKE_SOURCE_DIR}/tests)
 target_compile_options(column_partial_reduce PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-O3>)
 target_link_libraries(column_partial_reduce PRIVATE tcc_spmm)
+
+# Batch 4: best FP32 Column kernels converted to fused INT4 X + the Acc Basic
+# INT4 Fused baseline (mechanical copy of the Acc kernel with fused INT4 loads;
+# the third_party original stays untouched; acc_int4_fused.cu is a single-TU
+# Acc unit carrying converter + FP32 + INT4 launchers to avoid ODR clashes).
+add_executable(benchmark_fast_int4 bench/benchmark_fast_int4.cu bench/acc_int4_fused.cu)
+target_include_directories(benchmark_fast_int4 PRIVATE ${CMAKE_SOURCE_DIR}/tests
+    ${CUSPARSE_INCLUDE_DIR} ${CUBLAS_INCLUDE_DIR} ${CMAKE_SOURCE_DIR}/third_party/Acc-SpMM/include)
+target_compile_options(benchmark_fast_int4 PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-O3>)
+target_link_libraries(benchmark_fast_int4 PRIVATE tcc_spmm)

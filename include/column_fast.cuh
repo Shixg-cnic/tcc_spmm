@@ -1,5 +1,6 @@
 #pragma once
 #include "column_schedule.cuh"
+#include "int4_format.cuh"
 
 // Fast Column kernels (task-book batch 2): each CTA owns one Column Window
 // (8 input columns), loads X once per feature tile and reuses it across the
@@ -40,5 +41,12 @@ struct ColumnFastInfo {
 cudaError_t launchColumnFast(const DeviceColumnFast& matrix, const float* x, float* y,
     std::uint32_t features, FastVariant variant, std::uint32_t ftile = 128,
     std::uint32_t stages = 1, cudaStream_t stream = nullptr, bool clearOutput = true);
+// Fused INT4 X: same kernels, X loaded from the packed INT4 stream with
+// on-the-fly dequantisation (batch 4).
+cudaError_t launchColumnFastInt4(const DeviceColumnFast& matrix, const DeviceInt4X& x, float* y,
+    std::uint32_t features, FastVariant variant, std::uint32_t ftile = 128,
+    std::uint32_t stages = 1, cudaStream_t stream = nullptr, bool clearOutput = true);
 cudaError_t columnFastAttributes(FastVariant variant, std::uint32_t ftile,
+    std::uint32_t stages, ColumnFastInfo* info);
+cudaError_t columnFastInt4Attributes(FastVariant variant, std::uint32_t ftile,
     std::uint32_t stages, ColumnFastInfo* info);

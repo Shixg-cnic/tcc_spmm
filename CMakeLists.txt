@@ -27,7 +27,8 @@ add_library(tcc_spmm STATIC
     src/format/column_schedule.cpp
     src/kernel/column_adaptive.cu
     src/format/int4_quantize.cu
-    src/kernel/column_fast.cu)
+    src/kernel/column_fast.cu
+    src/kernel/column_striped.cu)
 set(TCC_SW_SIZE 16 CACHE STRING "Default Column SuperWindow size")
 set(TCC_CACHE_SIZE 32 CACHE STRING "Column cached rows per SuperWindow")
 target_compile_definitions(tcc_spmm PUBLIC TCC_SW_SIZE=${TCC_SW_SIZE} TCC_CACHE_SIZE=${TCC_CACHE_SIZE})
@@ -112,3 +113,9 @@ target_include_directories(benchmark_fast_int4 PRIVATE ${CMAKE_SOURCE_DIR}/tests
     ${CUSPARSE_INCLUDE_DIR} ${CUBLAS_INCLUDE_DIR} ${CMAKE_SOURCE_DIR}/third_party/Acc-SpMM/include)
 target_compile_options(benchmark_fast_int4 PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-O3>)
 target_link_libraries(benchmark_fast_int4 PRIVATE tcc_spmm)
+
+# Independent FP32 output-stripe experiment; main benchmark targets unchanged.
+add_executable(column_striped_test tests/column_striped_test.cu tests/acc_reference.cu)
+target_include_directories(column_striped_test PRIVATE ${CMAKE_SOURCE_DIR}/tests ${CUSPARSE_INCLUDE_DIR} ${CUBLAS_INCLUDE_DIR})
+target_compile_options(column_striped_test PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-O3>)
+target_link_libraries(column_striped_test PRIVATE tcc_spmm)

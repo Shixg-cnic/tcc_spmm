@@ -1,6 +1,7 @@
 #include "column_striped.cuh"
 #include "mma_tf32.cuh"
 #include <cuda_runtime.h>
+#include <algorithm>
 #include <stdexcept>
 #include <limits>
 

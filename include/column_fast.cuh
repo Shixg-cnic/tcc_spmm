@@ -50,3 +50,11 @@ cudaError_t columnFastAttributes(FastVariant variant, std::uint32_t ftile,
     std::uint32_t stages, ColumnFastInfo* info);
 cudaError_t columnFastInt4Attributes(FastVariant variant, std::uint32_t ftile,
     std::uint32_t stages, ColumnFastInfo* info);
+
+// Ordered V2C (experiment/cw-order-only): blockIdx.x is a task position and
+// the CW id is dTaskOrder[blockIdx.x] (a strict permutation of all CW ids).
+// Fixed WIDE=4 / FTILE=128 / FP32; supports features 128 or 256 only. The
+// compute/dataflow/output addresses are identical to the original V2C.
+cudaError_t launchColumnFastOrdered(const DeviceColumnFast& matrix, const float* x, float* y,
+    const std::uint32_t* dTaskOrder, std::uint32_t features,
+    cudaStream_t stream = nullptr, bool clearOutput = true);

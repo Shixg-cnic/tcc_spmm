@@ -115,13 +115,19 @@ __device__ __forceinline__ void emitFast(const float c[4], const U* rows, float*
 
 // Core fast kernel: WIDE in {1,2,4}, internal feature tile FTILE.
 // Int4: X loaded fused from the packed INT4 stream (see fastLoadXInt4).
-template<int WIDE, int FTILE, bool Int4 = false>
-__global__ void fastKernel(DeviceColumnFast m, const void* x, float* y, U features) {
+// Ordered: CW id comes from the task-position -> CW permutation (offline
+// task-order experiment, experiment/cw-order-only). All other computation is
+// unchanged. Ordered=false callers pass taskOrder=nullptr (unused).
+template<int WIDE, int FTILE, bool Int4 = false, bool Ordered = false>
+__global__ void fastKernel(DeviceColumnFast m, const void* x, float* y, U features,
+    const U* taskOrder) {
     constexpr int WARPS = FTILE / 32;
     __shared__ float a[64];
     __shared__ U rows[8];
     const U windows = (std::uint64_t(m.cols) + 7) / 8;
-    const U w = blockIdx.x;
+    U w;
+    if constexpr (Ordered) w = taskOrder[blockIdx.x];
+    else w = blockIdx.x;
     const U fBase = blockIdx.y * FTILE + (threadIdx.x / 32) * 32;
     const U lane = threadIdx.x % 32, group = lane / 4, k = lane % 4;
     float b[2][4];
@@ -195,10 +201,11 @@ __global__ void fastPipeKernel(DeviceColumnFast m, const void* x, float* y, U fe
     }
 }
 
-template<int WIDE, int FTILE, bool Int4 = false>
+template<int WIDE, int FTILE, bool Int4 = false, bool Ordered = false>
 void launchFast(dim3 grid, DeviceColumnFast m, const void* x, float* y,
-    U features, cudaStream_t stream) {
-    fastKernel<WIDE, FTILE, Int4><<<grid, FTILE / 32 * 32, 0, stream>>>(m, x, y, features);
+    U features, cudaStream_t stream, const U* taskOrder = nullptr) {
+    fastKernel<WIDE, FTILE, Int4, Ordered><<<grid, FTILE / 32 * 32, 0, stream>>>(
+        m, x, y, features, taskOrder);
 }
 
 template<bool Int4>
@@ -213,28 +220,28 @@ cudaError_t launchImpl(const DeviceColumnFast& m, const void* x, float* y,
     dim3 grid(windows, features / ftile);
     switch (variant) {
         case FAST_V1:
-            if (ftile == 128) launchFast<1, 128, Int4>(grid, m, x, y, features, stream);
-            else if (ftile == 256) launchFast<1, 256, Int4>(grid, m, x, y, features, stream);
-            else if (ftile == 64) launchFast<1, 64, Int4>(grid, m, x, y, features, stream);
-            else launchFast<1, 32, Int4>(grid, m, x, y, features, stream);
+            if (ftile == 128) launchFast<1, 128, Int4, false>(grid, m, x, y, features, stream);
+            else if (ftile == 256) launchFast<1, 256, Int4, false>(grid, m, x, y, features, stream);
+            else if (ftile == 64) launchFast<1, 64, Int4, false>(grid, m, x, y, features, stream);
+            else launchFast<1, 32, Int4, false>(grid, m, x, y, features, stream);
             break;
         case FAST_V2A:
-            launchFast<1, 128, Int4>(grid, m, x, y, features, stream);
+            launchFast<1, 128, Int4, false>(grid, m, x, y, features, stream);
             break;
         case FAST_V2B:
-            launchFast<2, 128, Int4>(grid, m, x, y, features, stream);
+            launchFast<2, 128, Int4, false>(grid, m, x, y, features, stream);
             break;
         case FAST_V2C:
-            if (ftile == 64) launchFast<4, 64, Int4>(grid, m, x, y, features, stream);
-            else if (ftile == 32) launchFast<4, 32, Int4>(grid, m, x, y, features, stream);
-            else if (ftile == 256) launchFast<4, 256, Int4>(grid, m, x, y, features, stream);
-            else launchFast<4, 128, Int4>(grid, m, x, y, features, stream);
+            if (ftile == 64) launchFast<4, 64, Int4, false>(grid, m, x, y, features, stream);
+            else if (ftile == 32) launchFast<4, 32, Int4, false>(grid, m, x, y, features, stream);
+            else if (ftile == 256) launchFast<4, 256, Int4, false>(grid, m, x, y, features, stream);
+            else launchFast<4, 128, Int4, false>(grid, m, x, y, features, stream);
             break;
         case FAST_V4:
-            if (ftile == 256) launchFast<1, 256, Int4>(grid, m, x, y, features, stream);
-            else if (ftile == 64) launchFast<1, 64, Int4>(grid, m, x, y, features, stream);
-            else if (ftile == 32) launchFast<1, 32, Int4>(grid, m, x, y, features, stream);
-            else launchFast<1, 128, Int4>(grid, m, x, y, features, stream);
+            if (ftile == 256) launchFast<1, 256, Int4, false>(grid, m, x, y, features, stream);
+            else if (ftile == 64) launchFast<1, 64, Int4, false>(grid, m, x, y, features, stream);
+            else if (ftile == 32) launchFast<1, 32, Int4, false>(grid, m, x, y, features, stream);
+            else launchFast<1, 128, Int4, false>(grid, m, x, y, features, stream);
             break;
         case FAST_V3W:
             if (stages == 4) fastPipeKernel<4, 2, Int4><<<grid, 128, 0, stream>>>(m, x, y, features);
@@ -278,22 +285,22 @@ cudaError_t columnFastAttributesImpl(FastVariant variant, std::uint32_t ftile,
     };
     switch (variant) {
         case FAST_V1:
-            if (ftile == 256) return fill((const void*)fastKernel<1, 256, Int4>, 256, 0);
-            if (ftile == 64) return fill((const void*)fastKernel<1, 64, Int4>, 64, 0);
-            if (ftile == 32) return fill((const void*)fastKernel<1, 32, Int4>, 32, 0);
-            return fill((const void*)fastKernel<1, 128, Int4>, 128, 0);
-        case FAST_V2A: return fill((const void*)fastKernel<1, 128, Int4>, 128, 0);
-        case FAST_V2B: return fill((const void*)fastKernel<2, 128, Int4>, 128, 0);
+            if (ftile == 256) return fill((const void*)fastKernel<1, 256, Int4, false>, 256, 0);
+            if (ftile == 64) return fill((const void*)fastKernel<1, 64, Int4, false>, 64, 0);
+            if (ftile == 32) return fill((const void*)fastKernel<1, 32, Int4, false>, 32, 0);
+            return fill((const void*)fastKernel<1, 128, Int4, false>, 128, 0);
+        case FAST_V2A: return fill((const void*)fastKernel<1, 128, Int4, false>, 128, 0);
+        case FAST_V2B: return fill((const void*)fastKernel<2, 128, Int4, false>, 128, 0);
         case FAST_V2C:
-            if (ftile == 256) return fill((const void*)fastKernel<4, 256, Int4>, 256, 0);
-            if (ftile == 64) return fill((const void*)fastKernel<4, 64, Int4>, 64, 0);
-            if (ftile == 32) return fill((const void*)fastKernel<4, 32, Int4>, 32, 0);
-            return fill((const void*)fastKernel<4, 128, Int4>, 128, 0);
+            if (ftile == 256) return fill((const void*)fastKernel<4, 256, Int4, false>, 256, 0);
+            if (ftile == 64) return fill((const void*)fastKernel<4, 64, Int4, false>, 64, 0);
+            if (ftile == 32) return fill((const void*)fastKernel<4, 32, Int4, false>, 32, 0);
+            return fill((const void*)fastKernel<4, 128, Int4, false>, 128, 0);
         case FAST_V4:
-            if (ftile == 256) return fill((const void*)fastKernel<1, 256, Int4>, 256, 0);
-            if (ftile == 64) return fill((const void*)fastKernel<1, 64, Int4>, 64, 0);
-            if (ftile == 32) return fill((const void*)fastKernel<1, 32, Int4>, 32, 0);
-            return fill((const void*)fastKernel<1, 128, Int4>, 128, 0);
+            if (ftile == 256) return fill((const void*)fastKernel<1, 256, Int4, false>, 256, 0);
+            if (ftile == 64) return fill((const void*)fastKernel<1, 64, Int4, false>, 64, 0);
+            if (ftile == 32) return fill((const void*)fastKernel<1, 32, Int4, false>, 32, 0);
+            return fill((const void*)fastKernel<1, 128, Int4, false>, 128, 0);
         case FAST_V3W:
             if (stages == 4) return fill((const void*)fastPipeKernel<4, 2, Int4>, 128, 0);
             return fill((const void*)fastPipeKernel<2, 2, Int4>, 128, 0);
@@ -313,4 +320,25 @@ cudaError_t columnFastAttributes(FastVariant variant, std::uint32_t ftile,
 cudaError_t columnFastInt4Attributes(FastVariant variant, std::uint32_t ftile,
     std::uint32_t stages, ColumnFastInfo* info) {
     return columnFastAttributesImpl<true>(variant, ftile, stages, info);
+}
+
+// Ordered V2C (experiment/cw-order-only): task position blockIdx.x maps to CW
+// w = dTaskOrder[blockIdx.x]. Fixed WIDE=4 / FTILE=128 / FP32; only
+// features 128 or 256 supported. All computation identical to the original
+// V2C; only the CW id source changes. Y is zeroed once before the kernel
+// when clearOutput is true (never per-CW, no cross-CTA synchronization).
+cudaError_t launchColumnFastOrdered(const DeviceColumnFast& matrix, const float* x, float* y,
+    const std::uint32_t* dTaskOrder, std::uint32_t features,
+    cudaStream_t stream, bool clearOutput) {
+    const U windows = (std::uint64_t(matrix.cols) + 7) / 8;
+    if (features != 128 && features != 256) return cudaErrorInvalidValue;
+    if (!dTaskOrder) return cudaErrorInvalidValue;
+    if (clearOutput) {
+        auto status = cudaMemsetAsync(y, 0, std::size_t(matrix.rows) * features * sizeof(float), stream);
+        if (status != cudaSuccess) return status;
+    }
+    dim3 grid(windows, features / 128);
+    fastKernel<4, 128, false, true><<<grid, 128, 0, stream>>>(
+        matrix, x, y, features, dTaskOrder);
+    return cudaGetLastError();
 }

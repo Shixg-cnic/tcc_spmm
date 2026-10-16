@@ -27,7 +27,8 @@ add_library(tcc_spmm STATIC
     src/format/column_schedule.cpp
     src/kernel/column_adaptive.cu
     src/format/int4_quantize.cu
-    src/kernel/column_fast.cu)
+    src/kernel/column_fast.cu
+    src/format/cw_order.cpp)
 set(TCC_SW_SIZE 16 CACHE STRING "Default Column SuperWindow size")
 set(TCC_CACHE_SIZE 32 CACHE STRING "Column cached rows per SuperWindow")
 target_compile_definitions(tcc_spmm PUBLIC TCC_SW_SIZE=${TCC_SW_SIZE} TCC_CACHE_SIZE=${TCC_CACHE_SIZE})
@@ -112,3 +113,23 @@ target_include_directories(benchmark_fast_int4 PRIVATE ${CMAKE_SOURCE_DIR}/tests
     ${CUSPARSE_INCLUDE_DIR} ${CUBLAS_INCLUDE_DIR} ${CMAKE_SOURCE_DIR}/third_party/Acc-SpMM/include)
 target_compile_options(benchmark_fast_int4 PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-O3>)
 target_link_libraries(benchmark_fast_int4 PRIVATE tcc_spmm)
+
+# CW execution-order experiment (experiment/cw-order-only): offline orders +
+# structure statistics, ordered V2C benchmark and correctness test.
+add_executable(analyze_cw_order bench/analyze_cw_order.cpp)
+target_include_directories(analyze_cw_order PRIVATE ${CMAKE_SOURCE_DIR}/tests)
+target_compile_options(analyze_cw_order PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-O3>)
+target_link_libraries(analyze_cw_order PRIVATE tcc_spmm)
+
+add_executable(benchmark_cw_order bench/benchmark_cw_order.cu tests/acc_reference.cu)
+target_include_directories(benchmark_cw_order PRIVATE ${CMAKE_SOURCE_DIR}/tests
+    ${CUSPARSE_INCLUDE_DIR} ${CUBLAS_INCLUDE_DIR} ${CMAKE_SOURCE_DIR}/third_party/Acc-SpMM/include)
+target_compile_options(benchmark_cw_order PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-O3>)
+target_link_libraries(benchmark_cw_order PRIVATE tcc_spmm)
+
+add_executable(cw_order_test tests/cw_order_test.cu tests/acc_reference.cu)
+target_include_directories(cw_order_test PRIVATE ${CMAKE_SOURCE_DIR}/tests
+    ${CUSPARSE_INCLUDE_DIR} ${CUBLAS_INCLUDE_DIR} ${CMAKE_SOURCE_DIR}/third_party/Acc-SpMM/include)
+target_compile_options(cw_order_test PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-O3>)
+target_link_libraries(cw_order_test PRIVATE tcc_spmm)
+add_test(NAME cw_order_correctness COMMAND cw_order_test)

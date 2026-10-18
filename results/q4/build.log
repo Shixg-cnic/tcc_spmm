@@ -1,0 +1,282 @@
+[ 33%] Building CUDA object CMakeFiles/tcc_spmm.dir/src/kernel/column_q4.cu.o
+[ 33%] Building CUDA object CMakeFiles/tcc_spmm.dir/src/kernel/column_fast.cu.o
+[ 33%] Building CUDA object CMakeFiles/tcc_spmm.dir/src/kernel/column_spmm.cu.o
+[ 33%] Building CUDA object CMakeFiles/tcc_spmm.dir/src/kernel/row_spmm.cu.o
+[ 33%] Building CUDA object CMakeFiles/tcc_spmm.dir/src/kernel/column_adaptive.cu.o
+/home/shixingguo/work/GNN/tcc_spmm/src/kernel/column_fast.cu(124): warning #177-D: variable "WARPS" was declared but never referenced
+      constexpr int WARPS = FTILE / 32;
+                    ^
+          detected during:
+            instantiation of "void <unnamed>::launchFast<WIDE,FTILE,Int4,Ordered>(dim3, DeviceColumnFast, const void *, float *, <unnamed>::U, cudaStream_t, const <unnamed>::U *) [with WIDE=1, FTILE=128, Int4=false, Ordered=false]" at line 223
+            instantiation of "cudaError_t <unnamed>::launchImpl<Int4>(const DeviceColumnFast &, const void *, float *, <unnamed>::U, FastVariant, <unnamed>::U, <unnamed>::U, cudaStream_t, __nv_bool) [with Int4=false]" at line 264
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+/home/shixingguo/work/GNN/tcc_spmm/src/kernel/column_fast.cu(127): warning #177-D: variable "windows" was declared but never referenced
+      const U windows = (std::uint64_t(m.cols) + 7) / 8;
+              ^
+          detected during:
+            instantiation of "void <unnamed>::launchFast<WIDE,FTILE,Int4,Ordered>(dim3, DeviceColumnFast, const void *, float *, <unnamed>::U, cudaStream_t, const <unnamed>::U *) [with WIDE=1, FTILE=128, Int4=false, Ordered=false]" at line 223
+            instantiation of "cudaError_t <unnamed>::launchImpl<Int4>(const DeviceColumnFast &, const void *, float *, <unnamed>::U, FastVariant, <unnamed>::U, <unnamed>::U, cudaStream_t, __nv_bool) [with Int4=false]" at line 264
+
+/home/shixingguo/work/GNN/tcc_spmm/src/kernel/column_fast.cu(164): warning #177-D: variable "windows" was declared but never referenced
+      const U windows = (std::uint64_t(m.cols) + 7) / 8;
+              ^
+          detected during instantiation of "cudaError_t <unnamed>::launchImpl<Int4>(const DeviceColumnFast &, const void *, float *, <unnamed>::U, FastVariant, <unnamed>::U, <unnamed>::U, cudaStream_t, __nv_bool) [with Int4=false]" at line 264
+
+ptxas info    : 0 bytes gmem
+ptxas info    : Compiling entry function '_ZN44_GLOBAL__N__3e48b5d8_11_row_spmm_cu_3d931e7c13rowSpmmKernelILb0EEEvPKmPKjPKfS4_S4_S6_Pfjjj' for 'sm_120'
+ptxas info    : Function properties for _ZN44_GLOBAL__N__3e48b5d8_11_row_spmm_cu_3d931e7c13rowSpmmKernelILb0EEEvPKmPKjPKfS4_S4_S6_Pfjjj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 45 registers, used 1 barriers, 576 bytes smem
+ptxas info    : Compile time = 101.293 ms
+ptxas info    : Compiling entry function '_ZN44_GLOBAL__N__3e48b5d8_11_row_spmm_cu_3d931e7c13rowSpmmKernelILb1EEEvPKmPKjPKfS4_S4_S6_Pfjjj' for 'sm_120'
+ptxas info    : Function properties for _ZN44_GLOBAL__N__3e48b5d8_11_row_spmm_cu_3d931e7c13rowSpmmKernelILb1EEEvPKmPKjPKfS4_S4_S6_Pfjjj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 43 registers, used 1 barriers, 576 bytes smem
+ptxas info    : Compile time = 65.457 ms
+ptxas info    : 0 bytes gmem
+ptxas info    : Compiling entry function '_ZN51_GLOBAL__N__4a63164a_18_column_adaptive_cu_4bf54d0620columnAdaptiveKernelILb0ELb1EEEv20DeviceColumnAdaptivePKvPfj' for 'sm_120'
+ptxas info    : Function properties for _ZN51_GLOBAL__N__4a63164a_18_column_adaptive_cu_4bf54d0620columnAdaptiveKernelILb0ELb1EEEv20DeviceColumnAdaptivePKvPfj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 44 registers, used 1 barriers, 576 bytes smem
+ptxas info    : Compile time = 100.112 ms
+ptxas info    : Compiling entry function '_ZN51_GLOBAL__N__4a63164a_18_column_adaptive_cu_4bf54d0620columnAdaptiveKernelILb1ELb1EEEv20DeviceColumnAdaptivePKvPfj' for 'sm_120'
+ptxas info    : Function properties for _ZN51_GLOBAL__N__4a63164a_18_column_adaptive_cu_4bf54d0620columnAdaptiveKernelILb1ELb1EEEv20DeviceColumnAdaptivePKvPfj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 48 registers, used 1 barriers, 576 bytes smem
+ptxas info    : Compile time = 46.735 ms
+ptxas info    : Compiling entry function '_ZN51_GLOBAL__N__4a63164a_18_column_adaptive_cu_4bf54d0620columnAdaptiveKernelILb0ELb0EEEv20DeviceColumnAdaptivePKvPfj' for 'sm_120'
+ptxas info    : Function properties for _ZN51_GLOBAL__N__4a63164a_18_column_adaptive_cu_4bf54d0620columnAdaptiveKernelILb0ELb0EEEv20DeviceColumnAdaptivePKvPfj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 40 registers, used 1 barriers, 576 bytes smem
+ptxas info    : Compile time = 22.903 ms
+ptxas info    : Compiling entry function '_ZN51_GLOBAL__N__4a63164a_18_column_adaptive_cu_4bf54d0620columnAdaptiveKernelILb1ELb0EEEv20DeviceColumnAdaptivePKvPfj' for 'sm_120'
+ptxas info    : Function properties for _ZN51_GLOBAL__N__4a63164a_18_column_adaptive_cu_4bf54d0620columnAdaptiveKernelILb1ELb0EEEv20DeviceColumnAdaptivePKvPfj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 48 registers, used 1 barriers, 576 bytes smem
+ptxas info    : Compile time = 31.960 ms
+ptxas info    : 0 bytes gmem
+ptxas info    : Compiling entry function '_ZN45_GLOBAL__N__cc7bafcc_12_column_q4_cu_502953306kernelILi4EEEv8DeviceQ4PKfPfj' for 'sm_120'
+ptxas info    : Function properties for _ZN45_GLOBAL__N__cc7bafcc_12_column_q4_cu_502953306kernelILi4EEEv8DeviceQ4PKfPfj
+    8 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 64 registers, used 1 barriers, 8 bytes cumulative stack size, 17408 bytes smem
+ptxas info    : Compile time = 99.991 ms
+ptxas info    : Compiling entry function '_ZN45_GLOBAL__N__cc7bafcc_12_column_q4_cu_502953306kernelILi3EEEv8DeviceQ4PKfPfj' for 'sm_120'
+ptxas info    : Function properties for _ZN45_GLOBAL__N__cc7bafcc_12_column_q4_cu_502953306kernelILi3EEEv8DeviceQ4PKfPfj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 64 registers, used 1 barriers, 17152 bytes smem
+ptxas info    : Compile time = 35.825 ms
+ptxas info    : Compiling entry function '_ZN45_GLOBAL__N__cc7bafcc_12_column_q4_cu_502953306kernelILi2EEEv8DeviceQ4PKfPfj' for 'sm_120'
+ptxas info    : Function properties for _ZN45_GLOBAL__N__cc7bafcc_12_column_q4_cu_502953306kernelILi2EEEv8DeviceQ4PKfPfj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 59 registers, used 1 barriers, 17152 bytes smem
+ptxas info    : Compile time = 33.841 ms
+ptxas info    : Compiling entry function '_ZN45_GLOBAL__N__cc7bafcc_12_column_q4_cu_502953306kernelILi1EEEv8DeviceQ4PKfPfj' for 'sm_120'
+ptxas info    : Function properties for _ZN45_GLOBAL__N__cc7bafcc_12_column_q4_cu_502953306kernelILi1EEEv8DeviceQ4PKfPfj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 62 registers, used 1 barriers, 17152 bytes smem
+ptxas info    : Compile time = 34.354 ms
+ptxas info    : Compiling entry function '_ZN45_GLOBAL__N__cc7bafcc_12_column_q4_cu_502953306kernelILi0EEEv8DeviceQ4PKfPfj' for 'sm_120'
+ptxas info    : Function properties for _ZN45_GLOBAL__N__cc7bafcc_12_column_q4_cu_502953306kernelILi0EEEv8DeviceQ4PKfPfj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 34 registers, used 1 barriers, 256 bytes smem
+ptxas info    : Compile time = 13.505 ms
+ptxas info    : 0 bytes gmem
+ptxas info    : Compiling entry function '_ZN47_GLOBAL__N__927388c0_14_column_spmm_cu_c9acef0d12columnKernelILi3ELb1EEEv17DeviceColumnSWTCFPKvPfj' for 'sm_120'
+ptxas info    : Function properties for _ZN47_GLOBAL__N__927388c0_14_column_spmm_cu_c9acef0d12columnKernelILi3ELb1EEEv17DeviceColumnSWTCFPKvPfj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 76 registers, used 1 barriers, 576 bytes smem
+ptxas info    : Compile time = 66.824 ms
+ptxas info    : Compiling entry function '_ZN47_GLOBAL__N__927388c0_14_column_spmm_cu_c9acef0d12columnKernelILi2ELb1EEEv17DeviceColumnSWTCFPKvPfj' for 'sm_120'
+ptxas info    : Function properties for _ZN47_GLOBAL__N__927388c0_14_column_spmm_cu_c9acef0d12columnKernelILi2ELb1EEEv17DeviceColumnSWTCFPKvPfj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 56 registers, used 1 barriers, 576 bytes smem
+ptxas info    : Compile time = 39.077 ms
+ptxas info    : Compiling entry function '_ZN47_GLOBAL__N__927388c0_14_column_spmm_cu_c9acef0d12columnKernelILi1ELb1EEEv17DeviceColumnSWTCFPKvPfj' for 'sm_120'
+ptxas info    : Function properties for _ZN47_GLOBAL__N__927388c0_14_column_spmm_cu_c9acef0d12columnKernelILi1ELb1EEEv17DeviceColumnSWTCFPKvPfj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 36 registers, used 1 barriers, 576 bytes smem
+ptxas info    : Compile time = 23.975 ms
+ptxas info    : Compiling entry function '_ZN47_GLOBAL__N__927388c0_14_column_spmm_cu_c9acef0d12columnKernelILi0ELb1EEEv17DeviceColumnSWTCFPKvPfj' for 'sm_120'
+ptxas info    : Function properties for _ZN47_GLOBAL__N__927388c0_14_column_spmm_cu_c9acef0d12columnKernelILi0ELb1EEEv17DeviceColumnSWTCFPKvPfj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 38 registers, used 1 barriers, 288 bytes smem
+ptxas info    : Compile time = 21.203 ms
+ptxas info    : Compiling entry function '_ZN47_GLOBAL__N__927388c0_14_column_spmm_cu_c9acef0d12columnKernelILi3ELb0EEEv17DeviceColumnSWTCFPKvPfj' for 'sm_120'
+ptxas info    : Function properties for _ZN47_GLOBAL__N__927388c0_14_column_spmm_cu_c9acef0d12columnKernelILi3ELb0EEEv17DeviceColumnSWTCFPKvPfj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 53 registers, used 1 barriers, 576 bytes smem
+ptxas info    : Compile time = 40.558 ms
+ptxas info    : Compiling entry function '_ZN47_GLOBAL__N__927388c0_14_column_spmm_cu_c9acef0d12columnKernelILi2ELb0EEEv17DeviceColumnSWTCFPKvPfj' for 'sm_120'
+ptxas info    : Function properties for _ZN47_GLOBAL__N__927388c0_14_column_spmm_cu_c9acef0d12columnKernelILi2ELb0EEEv17DeviceColumnSWTCFPKvPfj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 52 registers, used 1 barriers, 576 bytes smem
+ptxas info    : Compile time = 29.012 ms
+ptxas info    : Compiling entry function '_ZN47_GLOBAL__N__927388c0_14_column_spmm_cu_c9acef0d12columnKernelILi1ELb0EEEv17DeviceColumnSWTCFPKvPfj' for 'sm_120'
+ptxas info    : Function properties for _ZN47_GLOBAL__N__927388c0_14_column_spmm_cu_c9acef0d12columnKernelILi1ELb0EEEv17DeviceColumnSWTCFPKvPfj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 38 registers, used 1 barriers, 576 bytes smem
+ptxas info    : Compile time = 20.074 ms
+ptxas info    : Compiling entry function '_ZN47_GLOBAL__N__927388c0_14_column_spmm_cu_c9acef0d12columnKernelILi0ELb0EEEv17DeviceColumnSWTCFPKvPfj' for 'sm_120'
+ptxas info    : Function properties for _ZN47_GLOBAL__N__927388c0_14_column_spmm_cu_c9acef0d12columnKernelILi0ELb0EEEv17DeviceColumnSWTCFPKvPfj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 40 registers, used 1 barriers, 288 bytes smem
+ptxas info    : Compile time = 17.146 ms
+ptxas info    : 0 bytes gmem
+ptxas info    : Compiling entry function '_ZN47_GLOBAL__N__9ddedb61_14_column_fast_cu_46d75f9a14fastPipeKernelILi2ELi1ELb1EEEv16DeviceColumnFastPKvPfj' for 'sm_120'
+ptxas info    : Function properties for _ZN47_GLOBAL__N__9ddedb61_14_column_fast_cu_46d75f9a14fastPipeKernelILi2ELi1ELb1EEEv16DeviceColumnFastPKvPfj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 40 registers, used 1 barriers, 576 bytes smem
+ptxas info    : Compile time = 24.449 ms
+ptxas info    : Compiling entry function '_ZN47_GLOBAL__N__9ddedb61_14_column_fast_cu_46d75f9a14fastPipeKernelILi4ELi1ELb1EEEv16DeviceColumnFastPKvPfj' for 'sm_120'
+ptxas info    : Function properties for _ZN47_GLOBAL__N__9ddedb61_14_column_fast_cu_46d75f9a14fastPipeKernelILi4ELi1ELb1EEEv16DeviceColumnFastPKvPfj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 36 registers, used 1 barriers, 1152 bytes smem
+ptxas info    : Compile time = 25.030 ms
+ptxas info    : Compiling entry function '_ZN47_GLOBAL__N__9ddedb61_14_column_fast_cu_46d75f9a14fastPipeKernelILi2ELi2ELb1EEEv16DeviceColumnFastPKvPfj' for 'sm_120'
+ptxas info    : Function properties for _ZN47_GLOBAL__N__9ddedb61_14_column_fast_cu_46d75f9a14fastPipeKernelILi2ELi2ELb1EEEv16DeviceColumnFastPKvPfj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 39 registers, used 1 barriers, 576 bytes smem
+ptxas info    : Compile time = 22.462 ms
+ptxas info    : Compiling entry function '_ZN47_GLOBAL__N__9ddedb61_14_column_fast_cu_46d75f9a14fastPipeKernelILi4ELi2ELb1EEEv16DeviceColumnFastPKvPfj' for 'sm_120'
+ptxas info    : Function properties for _ZN47_GLOBAL__N__9ddedb61_14_column_fast_cu_46d75f9a14fastPipeKernelILi4ELi2ELb1EEEv16DeviceColumnFastPKvPfj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 38 registers, used 1 barriers, 1152 bytes smem
+ptxas info    : Compile time = 22.170 ms
+ptxas info    : Compiling entry function '_ZN47_GLOBAL__N__9ddedb61_14_column_fast_cu_46d75f9a10fastKernelILi4ELi128ELb1ELb0EEEv16DeviceColumnFastPKvPfjPKj' for 'sm_120'
+ptxas info    : Function properties for _ZN47_GLOBAL__N__9ddedb61_14_column_fast_cu_46d75f9a10fastKernelILi4ELi128ELb1ELb0EEEv16DeviceColumnFastPKvPfjPKj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 56 registers, used 1 barriers, 288 bytes smem
+ptxas info    : Compile time = 28.001 ms
+ptxas info    : Compiling entry function '_ZN47_GLOBAL__N__9ddedb61_14_column_fast_cu_46d75f9a10fastKernelILi4ELi256ELb1ELb0EEEv16DeviceColumnFastPKvPfjPKj' for 'sm_120'
+ptxas info    : Function properties for _ZN47_GLOBAL__N__9ddedb61_14_column_fast_cu_46d75f9a10fastKernelILi4ELi256ELb1ELb0EEEv16DeviceColumnFastPKvPfjPKj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 56 registers, used 1 barriers, 288 bytes smem
+ptxas info    : Compile time = 26.750 ms
+ptxas info    : Compiling entry function '_ZN47_GLOBAL__N__9ddedb61_14_column_fast_cu_46d75f9a10fastKernelILi4ELi32ELb1ELb0EEEv16DeviceColumnFastPKvPfjPKj' for 'sm_120'
+ptxas info    : Function properties for _ZN47_GLOBAL__N__9ddedb61_14_column_fast_cu_46d75f9a10fastKernelILi4ELi32ELb1ELb0EEEv16DeviceColumnFastPKvPfjPKj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 56 registers, used 1 barriers, 288 bytes smem
+ptxas info    : Compile time = 26.283 ms
+ptxas info    : Compiling entry function '_ZN47_GLOBAL__N__9ddedb61_14_column_fast_cu_46d75f9a10fastKernelILi4ELi64ELb1ELb0EEEv16DeviceColumnFastPKvPfjPKj' for 'sm_120'
+ptxas info    : Function properties for _ZN47_GLOBAL__N__9ddedb61_14_column_fast_cu_46d75f9a10fastKernelILi4ELi64ELb1ELb0EEEv16DeviceColumnFastPKvPfjPKj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 56 registers, used 1 barriers, 288 bytes smem
+ptxas info    : Compile time = 25.596 ms
+ptxas info    : Compiling entry function '_ZN47_GLOBAL__N__9ddedb61_14_column_fast_cu_46d75f9a10fastKernelILi2ELi128ELb1ELb0EEEv16DeviceColumnFastPKvPfjPKj' for 'sm_120'
+ptxas info    : Function properties for _ZN47_GLOBAL__N__9ddedb61_14_column_fast_cu_46d75f9a10fastKernelILi2ELi128ELb1ELb0EEEv16DeviceColumnFastPKvPfjPKj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 56 registers, used 1 barriers, 288 bytes smem
+ptxas info    : Compile time = 25.876 ms
+ptxas info    : Compiling entry function '_ZN47_GLOBAL__N__9ddedb61_14_column_fast_cu_46d75f9a10fastKernelILi1ELi32ELb1ELb0EEEv16DeviceColumnFastPKvPfjPKj' for 'sm_120'
+ptxas info    : Function properties for _ZN47_GLOBAL__N__9ddedb61_14_column_fast_cu_46d75f9a10fastKernelILi1ELi32ELb1ELb0EEEv16DeviceColumnFastPKvPfjPKj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 56 registers, used 1 barriers, 288 bytes smem
+ptxas info    : Compile time = 26.725 ms
+ptxas info    : Compiling entry function '_ZN47_GLOBAL__N__9ddedb61_14_column_fast_cu_46d75f9a10fastKernelILi1ELi64ELb1ELb0EEEv16DeviceColumnFastPKvPfjPKj' for 'sm_120'
+ptxas info    : Function properties for _ZN47_GLOBAL__N__9ddedb61_14_column_fast_cu_46d75f9a10fastKernelILi1ELi64ELb1ELb0EEEv16DeviceColumnFastPKvPfjPKj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 56 registers, used 1 barriers, 288 bytes smem
+ptxas info    : Compile time = 28.712 ms
+ptxas info    : Compiling entry function '_ZN47_GLOBAL__N__9ddedb61_14_column_fast_cu_46d75f9a10fastKernelILi1ELi256ELb1ELb0EEEv16DeviceColumnFastPKvPfjPKj' for 'sm_120'
+ptxas info    : Function properties for _ZN47_GLOBAL__N__9ddedb61_14_column_fast_cu_46d75f9a10fastKernelILi1ELi256ELb1ELb0EEEv16DeviceColumnFastPKvPfjPKj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 56 registers, used 1 barriers, 288 bytes smem
+ptxas info    : Compile time = 29.426 ms
+ptxas info    : Compiling entry function '_ZN47_GLOBAL__N__9ddedb61_14_column_fast_cu_46d75f9a10fastKernelILi1ELi128ELb1ELb0EEEv16DeviceColumnFastPKvPfjPKj' for 'sm_120'
+ptxas info    : Function properties for _ZN47_GLOBAL__N__9ddedb61_14_column_fast_cu_46d75f9a10fastKernelILi1ELi128ELb1ELb0EEEv16DeviceColumnFastPKvPfjPKj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 56 registers, used 1 barriers, 288 bytes smem
+ptxas info    : Compile time = 29.225 ms
+ptxas info    : Compiling entry function '_ZN47_GLOBAL__N__9ddedb61_14_column_fast_cu_46d75f9a14fastPipeKernelILi2ELi1ELb0EEEv16DeviceColumnFastPKvPfj' for 'sm_120'
+ptxas info    : Function properties for _ZN47_GLOBAL__N__9ddedb61_14_column_fast_cu_46d75f9a14fastPipeKernelILi2ELi1ELb0EEEv16DeviceColumnFastPKvPfj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 40 registers, used 1 barriers, 576 bytes smem
+ptxas info    : Compile time = 18.830 ms
+ptxas info    : Compiling entry function '_ZN47_GLOBAL__N__9ddedb61_14_column_fast_cu_46d75f9a14fastPipeKernelILi4ELi1ELb0EEEv16DeviceColumnFastPKvPfj' for 'sm_120'
+ptxas info    : Function properties for _ZN47_GLOBAL__N__9ddedb61_14_column_fast_cu_46d75f9a14fastPipeKernelILi4ELi1ELb0EEEv16DeviceColumnFastPKvPfj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 38 registers, used 1 barriers, 1152 bytes smem
+ptxas info    : Compile time = 18.793 ms
+ptxas info    : Compiling entry function '_ZN47_GLOBAL__N__9ddedb61_14_column_fast_cu_46d75f9a14fastPipeKernelILi2ELi2ELb0EEEv16DeviceColumnFastPKvPfj' for 'sm_120'
+ptxas info    : Function properties for _ZN47_GLOBAL__N__9ddedb61_14_column_fast_cu_46d75f9a14fastPipeKernelILi2ELi2ELb0EEEv16DeviceColumnFastPKvPfj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 40 registers, used 1 barriers, 576 bytes smem
+ptxas info    : Compile time = 18.371 ms
+ptxas info    : Compiling entry function '_ZN47_GLOBAL__N__9ddedb61_14_column_fast_cu_46d75f9a14fastPipeKernelILi4ELi2ELb0EEEv16DeviceColumnFastPKvPfj' for 'sm_120'
+ptxas info    : Function properties for _ZN47_GLOBAL__N__9ddedb61_14_column_fast_cu_46d75f9a14fastPipeKernelILi4ELi2ELb0EEEv16DeviceColumnFastPKvPfj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 38 registers, used 1 barriers, 1152 bytes smem
+ptxas info    : Compile time = 17.784 ms
+ptxas info    : Compiling entry function '_ZN47_GLOBAL__N__9ddedb61_14_column_fast_cu_46d75f9a10fastKernelILi4ELi128ELb0ELb0EEEv16DeviceColumnFastPKvPfjPKj' for 'sm_120'
+ptxas info    : Function properties for _ZN47_GLOBAL__N__9ddedb61_14_column_fast_cu_46d75f9a10fastKernelILi4ELi128ELb0ELb0EEEv16DeviceColumnFastPKvPfjPKj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 56 registers, used 1 barriers, 288 bytes smem
+ptxas info    : Compile time = 24.353 ms
+ptxas info    : Compiling entry function '_ZN47_GLOBAL__N__9ddedb61_14_column_fast_cu_46d75f9a10fastKernelILi4ELi256ELb0ELb0EEEv16DeviceColumnFastPKvPfjPKj' for 'sm_120'
+ptxas info    : Function properties for _ZN47_GLOBAL__N__9ddedb61_14_column_fast_cu_46d75f9a10fastKernelILi4ELi256ELb0ELb0EEEv16DeviceColumnFastPKvPfjPKj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 56 registers, used 1 barriers, 288 bytes smem
+ptxas info    : Compile time = 25.760 ms
+ptxas info    : Compiling entry function '_ZN47_GLOBAL__N__9ddedb61_14_column_fast_cu_46d75f9a10fastKernelILi4ELi32ELb0ELb0EEEv16DeviceColumnFastPKvPfjPKj' for 'sm_120'
+ptxas info    : Function properties for _ZN47_GLOBAL__N__9ddedb61_14_column_fast_cu_46d75f9a10fastKernelILi4ELi32ELb0ELb0EEEv16DeviceColumnFastPKvPfjPKj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 56 registers, used 1 barriers, 288 bytes smem
+ptxas info    : Compile time = 24.998 ms
+ptxas info    : Compiling entry function '_ZN47_GLOBAL__N__9ddedb61_14_column_fast_cu_46d75f9a10fastKernelILi4ELi64ELb0ELb0EEEv16DeviceColumnFastPKvPfjPKj' for 'sm_120'
+ptxas info    : Function properties for _ZN47_GLOBAL__N__9ddedb61_14_column_fast_cu_46d75f9a10fastKernelILi4ELi64ELb0ELb0EEEv16DeviceColumnFastPKvPfjPKj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 56 registers, used 1 barriers, 288 bytes smem
+ptxas info    : Compile time = 25.001 ms
+ptxas info    : Compiling entry function '_ZN47_GLOBAL__N__9ddedb61_14_column_fast_cu_46d75f9a10fastKernelILi2ELi128ELb0ELb0EEEv16DeviceColumnFastPKvPfjPKj' for 'sm_120'
+ptxas info    : Function properties for _ZN47_GLOBAL__N__9ddedb61_14_column_fast_cu_46d75f9a10fastKernelILi2ELi128ELb0ELb0EEEv16DeviceColumnFastPKvPfjPKj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 56 registers, used 1 barriers, 288 bytes smem
+ptxas info    : Compile time = 24.821 ms
+ptxas info    : Compiling entry function '_ZN47_GLOBAL__N__9ddedb61_14_column_fast_cu_46d75f9a10fastKernelILi1ELi32ELb0ELb0EEEv16DeviceColumnFastPKvPfjPKj' for 'sm_120'
+ptxas info    : Function properties for _ZN47_GLOBAL__N__9ddedb61_14_column_fast_cu_46d75f9a10fastKernelILi1ELi32ELb0ELb0EEEv16DeviceColumnFastPKvPfjPKj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 56 registers, used 1 barriers, 288 bytes smem
+ptxas info    : Compile time = 24.340 ms
+ptxas info    : Compiling entry function '_ZN47_GLOBAL__N__9ddedb61_14_column_fast_cu_46d75f9a10fastKernelILi1ELi64ELb0ELb0EEEv16DeviceColumnFastPKvPfjPKj' for 'sm_120'
+ptxas info    : Function properties for _ZN47_GLOBAL__N__9ddedb61_14_column_fast_cu_46d75f9a10fastKernelILi1ELi64ELb0ELb0EEEv16DeviceColumnFastPKvPfjPKj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 56 registers, used 1 barriers, 288 bytes smem
+ptxas info    : Compile time = 24.075 ms
+ptxas info    : Compiling entry function '_ZN47_GLOBAL__N__9ddedb61_14_column_fast_cu_46d75f9a10fastKernelILi1ELi256ELb0ELb0EEEv16DeviceColumnFastPKvPfjPKj' for 'sm_120'
+ptxas info    : Function properties for _ZN47_GLOBAL__N__9ddedb61_14_column_fast_cu_46d75f9a10fastKernelILi1ELi256ELb0ELb0EEEv16DeviceColumnFastPKvPfjPKj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 56 registers, used 1 barriers, 288 bytes smem
+ptxas info    : Compile time = 23.459 ms
+ptxas info    : Compiling entry function '_ZN47_GLOBAL__N__9ddedb61_14_column_fast_cu_46d75f9a10fastKernelILi1ELi128ELb0ELb0EEEv16DeviceColumnFastPKvPfjPKj' for 'sm_120'
+ptxas info    : Function properties for _ZN47_GLOBAL__N__9ddedb61_14_column_fast_cu_46d75f9a10fastKernelILi1ELi128ELb0ELb0EEEv16DeviceColumnFastPKvPfjPKj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 56 registers, used 1 barriers, 288 bytes smem
+ptxas info    : Compile time = 23.490 ms
+ptxas info    : Compiling entry function '_ZN47_GLOBAL__N__9ddedb61_14_column_fast_cu_46d75f9a10fastKernelILi4ELi128ELb0ELb1EEEv16DeviceColumnFastPKvPfjPKj' for 'sm_120'
+ptxas info    : Function properties for _ZN47_GLOBAL__N__9ddedb61_14_column_fast_cu_46d75f9a10fastKernelILi4ELi128ELb0ELb1EEEv16DeviceColumnFastPKvPfjPKj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 56 registers, used 1 barriers, 288 bytes smem
+ptxas info    : Compile time = 24.719 ms
+[ 40%] Linking CXX static library libtcc_spmm.a
+[ 86%] Built target tcc_spmm
+[ 93%] Building CUDA object CMakeFiles/q4_test.dir/tests/q4_test.cu.o
+/home/shixingguo/work/GNN/tcc_spmm/tests/q4_test.cu(41): error: "auto" type is "__gnu_cxx::__alloc_traits<std::allocator<uint8_t>, std::allocator<uint8_t>::value_type>::value_type" (aka "unsigned char") for this entity, but was previously implied to be "__gnu_cxx::__alloc_traits<std::allocator<uint32_t>, std::allocator<uint32_t>::value_type>::value_type" (aka "unsigned int")
+              auto t=m.tileOrder[o],cw=m.orderCW[o];require(cw<task.count,"local CW");
+                                    ^
+
+1 error detected in the compilation of "/home/shixingguo/work/GNN/tcc_spmm/tests/q4_test.cu".
+gmake[3]: *** [CMakeFiles/q4_test.dir/build.make:77: CMakeFiles/q4_test.dir/tests/q4_test.cu.o] Error 2
+gmake[2]: *** [CMakeFiles/Makefile2:561: CMakeFiles/q4_test.dir/all] Error 2
+gmake[1]: *** [CMakeFiles/Makefile2:568: CMakeFiles/q4_test.dir/rule] Error 2
+gmake: *** [Makefile:355: q4_test] Error 2
+[ 86%] Built target tcc_spmm
+[ 93%] Building CUDA object CMakeFiles/q4_test.dir/tests/q4_test.cu.o
+[100%] Linking CXX executable q4_test
+[100%] Built target q4_test
+[ 81%] Built target tcc_spmm
+[ 93%] Building CUDA object CMakeFiles/benchmark_q4.dir/bench/benchmark_q4.cu.o
+[ 93%] Building CUDA object CMakeFiles/benchmark_q4.dir/tests/acc_reference.cu.o
+[100%] Linking CXX executable benchmark_q4
+[100%] Built target benchmark_q4

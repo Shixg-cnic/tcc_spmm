@@ -1,3 +1,5 @@
+> 历史设计：2026-10-18 起停止作为开发主线。当前方案见 [q4-request.txt](q4-request.txt) 和项目 README。
+
 # tcc_spmm 设计文档
 
 ## 流水线总览（固定约束）

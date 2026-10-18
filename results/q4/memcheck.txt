@@ -1,0 +1,3 @@
+========= COMPUTE-SANITIZER
+Q4 structure, lifetimes, deterministic grouping, fallback and all GPU variants passed
+========= ERROR SUMMARY: 0 errors

@@ -133,3 +133,13 @@ target_include_directories(cw_order_test PRIVATE ${CMAKE_SOURCE_DIR}/tests
 target_compile_options(cw_order_test PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-O3>)
 target_link_libraries(cw_order_test PRIVATE tcc_spmm)
 add_test(NAME cw_order_correctness COMMAND cw_order_test)
+
+# Current mainline: explicit source mapping + bounded MinHash grouping + Q4 lifetimes.
+target_sources(tcc_spmm PRIVATE src/format/column_q4.cpp src/kernel/column_q4.cu)
+add_executable(q4_test tests/q4_test.cu)
+target_link_libraries(q4_test PRIVATE tcc_spmm)
+add_test(NAME q4_correctness COMMAND q4_test)
+add_executable(benchmark_q4 bench/benchmark_q4.cu tests/acc_reference.cu)
+target_include_directories(benchmark_q4 PRIVATE tests ${CUSPARSE_INCLUDE_DIR} ${CUBLAS_INCLUDE_DIR})
+target_compile_options(benchmark_q4 PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-O3>)
+target_link_libraries(benchmark_q4 PRIVATE tcc_spmm)

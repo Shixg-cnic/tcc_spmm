@@ -30,3 +30,11 @@ cudaError_t launchAccRowSpMM(const std::uint32_t* window, const std::uint32_t* o
         bits, mapping, values, window, offset, x, y, cols, features);
     return cudaGetLastError();
 }
+
+cudaError_t accRowAttributes(std::uint32_t features,int* registers,int* sharedBytes,int* localBytes,int* blocksPerSM) {
+    cudaFuncAttributes a;
+    auto err=cudaFuncGetAttributes(&a,tf32_mma_kernel);
+    if(err!=cudaSuccess)return err;
+    *registers=a.numRegs;*sharedBytes=a.sharedSizeBytes;*localBytes=a.localSizeBytes;
+    return cudaOccupancyMaxActiveBlocksPerMultiprocessor(blocksPerSM,tf32_mma_kernel,features,0);
+}

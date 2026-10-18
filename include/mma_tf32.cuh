@@ -25,3 +25,15 @@ void tf32_m16n8k8(float* MatA, float* MatB, float* MatC) {
          "r"(B[0]), "r"(B[1])
     );
 }
+
+__device__ __forceinline__ std::uint32_t toTf32RnaBits(float value) {
+    std::uint32_t bits;
+    asm("cvt.rna.tf32.f32 %0, %1;" : "=r"(bits) : "f"(value));
+    return bits;
+}
+__device__ __forceinline__ void mmaTf32Bits(const std::uint32_t* a,const std::uint32_t* b,float* c) {
+    asm volatile("mma.sync.aligned.m16n8k8.row.col.f32.tf32.tf32.f32 "
+        "{%0,%1,%2,%3}, {%4,%5,%6,%7}, {%8,%9}, {%0,%1,%2,%3};"
+        : "+f"(c[0]),"+f"(c[1]),"+f"(c[2]),"+f"(c[3])
+        : "r"(a[0]),"r"(a[1]),"r"(a[2]),"r"(a[3]),"r"(b[0]),"r"(b[1]));
+}

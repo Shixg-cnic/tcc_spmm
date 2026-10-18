@@ -1,0 +1,26 @@
+[ 81%] Built target tcc_spmm
+[ 87%] Building CUDA object CMakeFiles/row_spmm_test.dir/tests/row_spmm_test.cu.o
+[ 93%] Building CUDA object CMakeFiles/row_spmm_test.dir/tests/acc_reference.cu.o
+[100%] Linking CXX executable row_spmm_test
+[100%] Built target row_spmm_test
+[ 86%] Built target tcc_spmm
+[ 93%] Building CUDA object CMakeFiles/column_spmm_test.dir/tests/column_spmm_test.cu.o
+[100%] Linking CXX executable column_spmm_test
+[100%] Built target column_spmm_test
+[ 86%] Built target tcc_spmm
+[ 93%] Building CUDA object CMakeFiles/adaptive_sw_test.dir/tests/adaptive_sw_test.cu.o
+[100%] Linking CXX executable adaptive_sw_test
+[100%] Built target adaptive_sw_test
+[ 86%] Built target tcc_spmm
+[ 93%] Building CUDA object CMakeFiles/int4_test.dir/tests/int4_test.cu.o
+[100%] Linking CXX executable int4_test
+[100%] Built target int4_test
+[ 86%] Built target tcc_spmm
+[ 93%] Building CUDA object CMakeFiles/column_fast_test.dir/tests/column_fast_test.cu.o
+[100%] Linking CXX executable column_fast_test
+[100%] Built target column_fast_test
+[ 81%] Built target tcc_spmm
+[ 93%] Building CUDA object CMakeFiles/cw_order_test.dir/tests/cw_order_test.cu.o
+[ 93%] Building CUDA object CMakeFiles/cw_order_test.dir/tests/acc_reference.cu.o
+[100%] Linking CXX executable cw_order_test
+[100%] Built target cw_order_test

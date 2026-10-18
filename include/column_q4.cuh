@@ -36,6 +36,8 @@ cudaError_t q4Attributes(Q4Version,ColumnKernelInfo*);
 
 // Capacity 0 selects the smallest supported H for the actual plan peak.
 // This is an explicit execution configuration, not an autotuned performance policy.
+// Each launch supports a feature stride of 128, 256, 384 or 512.
+// Larger/native-width matrices require explicit padding/feature slicing.
 struct Q4Config {
     Q4Version version=Q4Version::ScalarPipeline;
     unsigned cacheSlots=0;

@@ -1,0 +1,5 @@
+native F=1 all methods and adapters PASS
+native F=100 all methods and adapters PASS
+native F=128 all methods and adapters PASS
+native F=384 all methods and adapters PASS
+native F=500 all methods and adapters PASS

@@ -166,3 +166,9 @@ add_executable(benchmark_q4_datasets bench/benchmark_q4_datasets.cu tests/acc_re
 target_include_directories(benchmark_q4_datasets PRIVATE tests ${CUSPARSE_INCLUDE_DIR} ${CUBLAS_INCLUDE_DIR})
 target_compile_options(benchmark_q4_datasets PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-O3>)
 target_link_libraries(benchmark_q4_datasets PRIVATE tcc_spmm)
+
+add_executable(benchmark_native_features bench/benchmark_native_features.cu bench/acc_native_reference.cu)
+target_include_directories(benchmark_native_features PRIVATE tests ${CUSPARSE_INCLUDE_DIR} ${CUBLAS_INCLUDE_DIR})
+target_compile_options(benchmark_native_features PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-O3>)
+target_link_libraries(benchmark_native_features PRIVATE tcc_spmm)
+add_test(NAME native_features_correctness COMMAND benchmark_native_features --test)

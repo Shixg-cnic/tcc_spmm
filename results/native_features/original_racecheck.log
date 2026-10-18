@@ -1,0 +1,34 @@
+========= COMPUTE-SANITIZER
+========= Error: Race reported between Write access at tf32_mma_kernel(const unsigned long *, const unsigned int *, const float *, const unsigned int *, const unsigned int *, const float *, float *, unsigned int, unsigned int)+0x1280
+=========     and Read access at tf32_mma_kernel(const unsigned long *, const unsigned int *, const float *, const unsigned int *, const unsigned int *, const float *, float *, unsigned int, unsigned int)+0x680 [32 hazards]
+=========     and Read access at tf32_mma_kernel(const unsigned long *, const unsigned int *, const float *, const unsigned int *, const unsigned int *, const float *, float *, unsigned int, unsigned int)+0x6a0 [32 hazards]
+========= 
+========= Error: Race reported between Read access at tf32_mma_kernel(const unsigned long *, const unsigned int *, const float *, const unsigned int *, const unsigned int *, const float *, float *, unsigned int, unsigned int)+0x6a0
+=========     and Write access at tf32_mma_kernel(const unsigned long *, const unsigned int *, const float *, const unsigned int *, const unsigned int *, const float *, float *, unsigned int, unsigned int)+0x1280 [16 hazards]
+========= 
+========= Error: Race reported between Write access at tf32_mma_kernel(const unsigned long *, const unsigned int *, const float *, const unsigned int *, const unsigned int *, const float *, float *, unsigned int, unsigned int)+0x1280
+=========     and Read access at tf32_mma_kernel(const unsigned long *, const unsigned int *, const float *, const unsigned int *, const unsigned int *, const float *, float *, unsigned int, unsigned int)+0x680 [32 hazards]
+=========     and Read access at tf32_mma_kernel(const unsigned long *, const unsigned int *, const float *, const unsigned int *, const unsigned int *, const float *, float *, unsigned int, unsigned int)+0x6a0 [48 hazards]
+========= 
+========= Error: Race reported between Write access at tf32_mma_kernel(const unsigned long *, const unsigned int *, const float *, const unsigned int *, const unsigned int *, const float *, float *, unsigned int, unsigned int)+0x1280
+=========     and Read access at tf32_mma_kernel(const unsigned long *, const unsigned int *, const float *, const unsigned int *, const unsigned int *, const float *, float *, unsigned int, unsigned int)+0x680 [16 hazards]
+=========     and Read access at tf32_mma_kernel(const unsigned long *, const unsigned int *, const float *, const unsigned int *, const unsigned int *, const float *, float *, unsigned int, unsigned int)+0x6a0 [32 hazards]
+========= 
+========= Error: Race reported between Write access at tf32_mma_kernel(const unsigned long *, const unsigned int *, const float *, const unsigned int *, const unsigned int *, const float *, float *, unsigned int, unsigned int)+0x1280
+=========     and Read access at tf32_mma_kernel(const unsigned long *, const unsigned int *, const float *, const unsigned int *, const unsigned int *, const float *, float *, unsigned int, unsigned int)+0x680 [48 hazards]
+=========     and Read access at tf32_mma_kernel(const unsigned long *, const unsigned int *, const float *, const unsigned int *, const unsigned int *, const float *, float *, unsigned int, unsigned int)+0x6a0 [48 hazards]
+========= 
+========= Error: Race reported between Write access at tf32_mma_kernel(const unsigned long *, const unsigned int *, const float *, const unsigned int *, const unsigned int *, const float *, float *, unsigned int, unsigned int)+0x1280
+=========     and Read access at tf32_mma_kernel(const unsigned long *, const unsigned int *, const float *, const unsigned int *, const unsigned int *, const float *, float *, unsigned int, unsigned int)+0x680 [16 hazards]
+=========     and Read access at tf32_mma_kernel(const unsigned long *, const unsigned int *, const float *, const unsigned int *, const unsigned int *, const float *, float *, unsigned int, unsigned int)+0x6a0 [32 hazards]
+========= 
+========= Error: Race reported between Write access at tf32_mma_kernel(const unsigned long *, const unsigned int *, const float *, const unsigned int *, const unsigned int *, const float *, float *, unsigned int, unsigned int)+0x1280
+=========     and Read access at tf32_mma_kernel(const unsigned long *, const unsigned int *, const float *, const unsigned int *, const unsigned int *, const float *, float *, unsigned int, unsigned int)+0x680 [32 hazards]
+=========     and Read access at tf32_mma_kernel(const unsigned long *, const unsigned int *, const float *, const unsigned int *, const unsigned int *, const float *, float *, unsigned int, unsigned int)+0x6a0 [48 hazards]
+========= 
+========= Error: Race reported between Write access at tf32_mma_kernel(const unsigned long *, const unsigned int *, const float *, const unsigned int *, const unsigned int *, const float *, float *, unsigned int, unsigned int)+0x1280
+=========     and Read access at tf32_mma_kernel(const unsigned long *, const unsigned int *, const float *, const unsigned int *, const unsigned int *, const float *, float *, unsigned int, unsigned int)+0x680 [48 hazards]
+=========     and Read access at tf32_mma_kernel(const unsigned long *, const unsigned int *, const float *, const unsigned int *, const unsigned int *, const float *, float *, unsigned int, unsigned int)+0x6a0 [48 hazards]
+========= 
+========= Target application returned an error
+========= RACECHECK SUMMARY: 8 hazards displayed (8 errors, 0 warnings)

@@ -144,7 +144,7 @@ const void* pointer(Q4Config c,unsigned peak) {
 }
 cudaError_t launchQ4(const DeviceQ4& m,const float* x,float* y,U F,Q4Config config,cudaStream_t stream,bool clear) {
     auto p=pointer(config,m.peakSlots);
-    if(!m.rows||!m.cols||!x||!y||(F!=128&&F!=256)||!p) return cudaErrorInvalidValue;
+    if(!m.rows||!m.cols||!x||!y||(!F||F>512||F%128)||!p) return cudaErrorInvalidValue;
     if(clear) {auto err=cudaMemsetAsync(y,0,std::size_t(m.rows)*F*sizeof(float),stream);if(err!=cudaSuccess)return err;}
     U count=config.version==Q4Version::Q1?m.windows:m.taskCount;
     if(!count) return cudaSuccess;

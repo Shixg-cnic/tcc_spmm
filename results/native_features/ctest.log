@@ -1,0 +1,10 @@
+Internal ctest changing into directory: /home/shixingguo/work/GNN/tcc_spmm/build
+Test project /home/shixingguo/work/GNN/tcc_spmm/build
+    Start  7: q4_correctness
+1/2 Test  #7: q4_correctness ...................   Passed    0.66 sec
+    Start 10: native_features_correctness
+2/2 Test #10: native_features_correctness ......   Passed    0.39 sec
+
+100% tests passed, 0 tests failed out of 2
+
+Total Test time (real) =   1.08 sec

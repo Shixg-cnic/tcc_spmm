@@ -1,0 +1,5 @@
+[ 81%] Built target tcc_spmm
+[ 93%] Building CUDA object CMakeFiles/benchmark_native_features.dir/bench/benchmark_native_features.cu.o
+[ 93%] Building CUDA object CMakeFiles/benchmark_native_features.dir/bench/acc_native_reference.cu.o
+[100%] Linking CXX executable benchmark_native_features
+[100%] Built target benchmark_native_features

@@ -1,0 +1,76 @@
+{
+  "name": "pubmed",
+  "num_nodes": 19717,
+  "raw_edge_records": 88676,
+  "stored_edge_entries": 88648,
+  "feature_dim": 500,
+  "num_classes": 3,
+  "source": "https://raw.githubusercontent.com/kimiyoung/planetoid/master/data/",
+  "graph_policy": "symmetric union, remove self loops, deduplicate; no added self loops",
+  "feature_policy": "original supplied values converted to float32; no normalization, padding, truncation or synthetic values",
+  "split": "Planetoid public: original train/validation/test",
+  "split_sizes": {
+    "train": 60,
+    "valid": 500,
+    "test": 1000
+  },
+  "unassigned_nodes": 18157,
+  "files": {
+    "raw/ind.pubmed.allx": {
+      "bytes": 7578385,
+      "sha256": "508e538e2abdccdd54c4d3e9f49d638b4af7107d85845f66ddea5a5152658b7e"
+    },
+    "raw/ind.pubmed.ally": {
+      "bytes": 224739,
+      "sha256": "0c37bbe3b5014ec365e9d393cf4791925e5ed94fb194305d74f064a8d7b50f0e"
+    },
+    "raw/ind.pubmed.graph": {
+      "bytes": 471808,
+      "sha256": "5b89f0036ca22909471f1e6558eb42fa06e0c730a577bde5b058b40638f81dc9"
+    },
+    "raw/ind.pubmed.test.index": {
+      "bytes": 6000,
+      "sha256": "b101d421688bbaecbd82e8a18f1e282378d6830f3a37666f28ebc47f844341b5"
+    },
+    "raw/ind.pubmed.tx": {
+      "bytes": 405505,
+      "sha256": "4eb5f5d0f30f26497eb0ac6ac9719d09c67e284f1ed0385c93f3ef27a671da3d"
+    },
+    "raw/ind.pubmed.ty": {
+      "bytes": 12135,
+      "sha256": "ee2e0d4819d9fbcc403689c3bf2e49face401b605932f093bc58ab6461130fdd"
+    },
+    "raw/ind.pubmed.x": {
+      "bytes": 23172,
+      "sha256": "fbe9cb5c47200d1b7769a26e579be3b7130b556831f9d850e77c4c74f2599b33"
+    },
+    "raw/ind.pubmed.y": {
+      "bytes": 854,
+      "sha256": "e6c807633307a07ed659249006536a147c7999c797f11a2560752990181b41b3"
+    },
+    "processed/edge_index.npy": {
+      "bytes": 1418496,
+      "sha256": "128ba75fa08a8a655acbb531360fcfe1dfe1f9f889da47e221b5b9e53d407b70"
+    },
+    "processed/test_idx.npy": {
+      "bytes": 8128,
+      "sha256": "22d1630c36e01cffd2561297bbe1efd2950db73005e7e20337f5cb303f612780"
+    },
+    "processed/train_idx.npy": {
+      "bytes": 608,
+      "sha256": "dda64ddd7c28f66a76d0455b4054b6cf4f55b4a5351dabbcf80a781b18b9c5ad"
+    },
+    "processed/valid_idx.npy": {
+      "bytes": 4128,
+      "sha256": "3d48258c8c8c1cc155e235137c187e53bd4a00864c2b44fdbdc81001e05d98f2"
+    },
+    "processed/x.npy": {
+      "bytes": 39434128,
+      "sha256": "34d16496a5d9bb9db3ba2ba8ba3de214b5272ae23962b3ed9ea77ce6b2e120a8"
+    },
+    "processed/y.npy": {
+      "bytes": 157864,
+      "sha256": "014c63d0aa2f326f6d94cbddc611bade24fd00f5153cadd331dee94a9c0854e2"
+    }
+  }
+}

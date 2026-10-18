@@ -1,0 +1,77 @@
+[
+  {
+    "name": "ogbn-arxiv",
+    "hashes_verified": 16,
+    "nodes": 169343,
+    "stored_edges": 1166243,
+    "feature_dim": 128,
+    "split_sizes": {
+      "train": 90941,
+      "valid": 29799,
+      "test": 48603
+    },
+    "message_edges": 21,
+    "smoke_loss": 3.598684310913086,
+    "passed": true
+  },
+  {
+    "name": "ogbn-products",
+    "hashes_verified": 14,
+    "nodes": 2449029,
+    "stored_edges": 123718280,
+    "feature_dim": 100,
+    "split_sizes": {
+      "train": 196615,
+      "valid": 39323,
+      "test": 2213091
+    },
+    "message_edges": 0,
+    "smoke_loss": 4.132426738739014,
+    "passed": true
+  },
+  {
+    "name": "pubmed",
+    "hashes_verified": 14,
+    "nodes": 19717,
+    "stored_edges": 88648,
+    "feature_dim": 500,
+    "split_sizes": {
+      "train": 60,
+      "valid": 500,
+      "test": 1000
+    },
+    "message_edges": 89,
+    "smoke_loss": 1.1036241054534912,
+    "passed": true
+  },
+  {
+    "name": "dblp",
+    "hashes_verified": 7,
+    "nodes": 17716,
+    "stored_edges": 105734,
+    "feature_dim": 1639,
+    "split_sizes": {
+      "train": 10629,
+      "valid": 3542,
+      "test": 3545
+    },
+    "message_edges": 136,
+    "smoke_loss": 1.4047315120697021,
+    "passed": true
+  },
+  {
+    "name": "cora",
+    "hashes_verified": 14,
+    "nodes": 2708,
+    "stored_edges": 10556,
+    "feature_dim": 1433,
+    "split_sizes": {
+      "train": 140,
+      "valid": 500,
+      "test": 1000
+    },
+    "message_edges": 49,
+    "smoke_loss": 1.9771162271499634,
+    "passed": true
+  }
+]

@@ -1,0 +1,76 @@
+{
+  "name": "cora",
+  "num_nodes": 2708,
+  "raw_edge_records": 10858,
+  "stored_edge_entries": 10556,
+  "feature_dim": 1433,
+  "num_classes": 7,
+  "source": "https://raw.githubusercontent.com/kimiyoung/planetoid/master/data/",
+  "graph_policy": "symmetric union, remove self loops, deduplicate; no added self loops",
+  "feature_policy": "original supplied values converted to float32; no normalization, padding, truncation or synthetic values",
+  "split": "Planetoid public: original train/validation/test",
+  "split_sizes": {
+    "train": 140,
+    "valid": 500,
+    "test": 1000
+  },
+  "unassigned_nodes": 1068,
+  "files": {
+    "raw/ind.cora.allx": {
+      "bytes": 257305,
+      "sha256": "9419ba2f26f5c35243db64aba110e0f35a04851609e0dc5433450676ca6b8543"
+    },
+    "raw/ind.cora.ally": {
+      "bytes": 47959,
+      "sha256": "2b998f5cc7fedc86e7f97ca2498f47a1ffc1462c29e2d578b23bf3f62b6e7d71"
+    },
+    "raw/ind.cora.graph": {
+      "bytes": 59847,
+      "sha256": "58f13302f39dde8852dad6fe6d15b89b077b6d7f837626bce671ef80344b383d"
+    },
+    "raw/ind.cora.test.index": {
+      "bytes": 5000,
+      "sha256": "297ce89af2b51a6a194181c7dbe1796c6a1cf9cd9349a88383b1b1e227867875"
+    },
+    "raw/ind.cora.tx": {
+      "bytes": 148025,
+      "sha256": "b9afbaa4a400df991f6f02ef677e1e44da55ffc04801fd02f9e673987829226a"
+    },
+    "raw/ind.cora.ty": {
+      "bytes": 28135,
+      "sha256": "41f5ac76596a1699cc33f53084a2419e92961c42bb75f36fc38e616d348532ad"
+    },
+    "raw/ind.cora.x": {
+      "bytes": 22119,
+      "sha256": "23cfa55d91c6f624233f5eb7b6e3f141f1bd2b2ae39608a63cf5d084bb27baab"
+    },
+    "raw/ind.cora.y": {
+      "bytes": 4054,
+      "sha256": "94465c14eb53e04ca262198dcbb2521ee8af60fb3f3d546cd6ca24a511b0e7d1"
+    },
+    "processed/edge_index.npy": {
+      "bytes": 169024,
+      "sha256": "93aa6346fb5dc769be0ec8bcb5aa9438227c32040703f2a253e2216deae04311"
+    },
+    "processed/test_idx.npy": {
+      "bytes": 8128,
+      "sha256": "1fa695b8eb207b12b9d3ea1e6bdf9e8f6b2f553d47f9d75da33f83f09a53cba1"
+    },
+    "processed/train_idx.npy": {
+      "bytes": 1248,
+      "sha256": "261a257ae84f1d6695fbd575e68e224814e88a74e8fbad4cbcc12ec2574f4f4b"
+    },
+    "processed/valid_idx.npy": {
+      "bytes": 4128,
+      "sha256": "b57144c8777392114a59fced8df9e743c752a7b74f13c81ec34dd89ddcd09a41"
+    },
+    "processed/x.npy": {
+      "bytes": 15522384,
+      "sha256": "661aad5fb47f2eeb3656963355d56796912c34558f29eb58f2bde960f1fc8e86"
+    },
+    "processed/y.npy": {
+      "bytes": 21792,
+      "sha256": "1f2fde4fd4b4aca1a4ca053376fb00f5ebeb8fa3e04e8b2a9c0bfd273ca1c83b"
+    }
+  }
+}

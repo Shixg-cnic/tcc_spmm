@@ -1,0 +1,76 @@
+{
+  "name": "ogbn-products",
+  "num_nodes": 2449029,
+  "raw_edge_records": 61859140,
+  "stored_edge_entries": 123718280,
+  "feature_dim": 100,
+  "num_classes": 47,
+  "source": "https://ogb.stanford.edu/docs/nodeprop/ ; local original OGB raw CSV cache",
+  "graph_policy": "raw undirected edges plus reverse edges, preserving original duplicates/self loops; no new self loops",
+  "feature_policy": "original supplied values converted to float32; no normalization, padding, truncation or synthetic values",
+  "split": "official OGB sales_ranking",
+  "split_sizes": {
+    "train": 196615,
+    "valid": 39323,
+    "test": 2213091
+  },
+  "unassigned_nodes": 0,
+  "files": {
+    "raw/edge.csv.gz": {
+      "bytes": 301171605,
+      "sha256": "a012950cc853f8262d5bbc9d93ca393e978e1e8f34bcf639125585dc3b515341"
+    },
+    "raw/node-feat.csv.gz": {
+      "bytes": 1158090752,
+      "sha256": "a79ed897a297d1e574281335c1d35ace9e3b8b8daba56d8ab8c059ab1a38b1a0"
+    },
+    "raw/node-label.csv.gz": {
+      "bytes": 1578600,
+      "sha256": "5d817cf7dbdeb4e84418b3d96fb5f35846aa873095e9f743df4fec60d4a85c16"
+    },
+    "raw/num-edge-list.csv.gz": {
+      "bytes": 53,
+      "sha256": "f00282c003dc005d91cfb03c90b0138067fa42d3c8ea64df130be1be43a74c1a"
+    },
+    "raw/num-node-list.csv.gz": {
+      "bytes": 52,
+      "sha256": "59a706d20daab9a2612b81fb6a99902a086e4d4c861776df69abea69ffeea2e1"
+    },
+    "raw/split/sales_ranking/test.csv.gz": {
+      "bytes": 4675150,
+      "sha256": "5c2d6ab62251e5aed9a8808a9cac33ada14e07cd3e87d53a2acd936d81bee193"
+    },
+    "raw/split/sales_ranking/train.csv.gz": {
+      "bytes": 417928,
+      "sha256": "dc161da99306258bbf1f8cdb4130047dd483c95d59fb68c74186a12e15d8a835"
+    },
+    "raw/split/sales_ranking/valid.csv.gz": {
+      "bytes": 82619,
+      "sha256": "9ea7634b51381fd2184c35c5f58b1ef7e10de8ac9dbd07d012655db49d91ee2d"
+    },
+    "processed/edge_index.npy": {
+      "bytes": 1979492608,
+      "sha256": "4818a9d424028001aad591fb92a3854f7cd5d75117c3867a49cc763fb5c6f781"
+    },
+    "processed/test_idx.npy": {
+      "bytes": 17704856,
+      "sha256": "ff8b80ec7ed72de5efbbddc9204578db66e5ef774d816f9f5709e847b75cded9"
+    },
+    "processed/train_idx.npy": {
+      "bytes": 1573048,
+      "sha256": "ccd649dbca1e493bc0d656f56fb144e73f7e7eda30a32f597baa76a6b6f1fa2d"
+    },
+    "processed/valid_idx.npy": {
+      "bytes": 314712,
+      "sha256": "2a4ffcbd52ed72de96f23aaa150007bbacd7d453450bf12684bb2b892dd8329c"
+    },
+    "processed/x.npy": {
+      "bytes": 979611728,
+      "sha256": "99b541d46cec8c5e7bceaea9505c78b82b6a12cdba96cc823e53568e07538e30"
+    },
+    "processed/y.npy": {
+      "bytes": 19592360,
+      "sha256": "557ebf326f8435462120d1105653036f677b00a66cfd229fea6884323cd898d9"
+    }
+  }
+}

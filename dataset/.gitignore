@@ -1,0 +1,3 @@
+# Large real data stays local; scripts, manifests and documentation are tracked.
+*/raw/
+*/processed/

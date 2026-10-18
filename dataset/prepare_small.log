@@ -1,0 +1,6 @@
+Preparing cora
+cora verified 2708 10556 1433 {'train': 140, 'valid': 500, 'test': 1000}
+Preparing pubmed
+pubmed verified 19717 88648 500 {'train': 60, 'valid': 500, 'test': 1000}
+Preparing dblp
+dblp verified 17716 105734 1639 {'train': 10629, 'valid': 3542, 'test': 3545}

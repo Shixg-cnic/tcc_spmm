@@ -1,0 +1,4 @@
+Preparing ogbn-arxiv
+ogbn-arxiv verified 169343 1166243 128 {'train': 90941, 'valid': 29799, 'test': 48603}
+Preparing ogbn-products
+ogbn-products verified 2449029 123718280 100 {'train': 196615, 'valid': 39323, 'test': 2213091}

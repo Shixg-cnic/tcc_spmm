@@ -1,0 +1,84 @@
+{
+  "name": "ogbn-arxiv",
+  "num_nodes": 169343,
+  "raw_edge_records": 1166243,
+  "stored_edge_entries": 1166243,
+  "feature_dim": 128,
+  "num_classes": 40,
+  "source": "https://ogb.stanford.edu/docs/nodeprop/ ; local original OGB raw CSV cache",
+  "graph_policy": "original directed citation edges unchanged; no reverse edges or self loops added",
+  "feature_policy": "original supplied values converted to float32; no normalization, padding, truncation or synthetic values",
+  "split": "official OGB time",
+  "split_sizes": {
+    "train": 90941,
+    "valid": 29799,
+    "test": 48603
+  },
+  "unassigned_nodes": 0,
+  "files": {
+    "raw/edge.csv.gz": {
+      "bytes": 5033515,
+      "sha256": "47629e986116407d27eff4c9d2e923f06bf5da5c85cbae93b660f530bc9355df"
+    },
+    "raw/node-feat.csv.gz": {
+      "bytes": 76357181,
+      "sha256": "60a844c7aff2f129335d34da2f6b9271bd1cac03aff8c70c229e6f0d13624718"
+    },
+    "raw/node-label.csv.gz": {
+      "bytes": 123505,
+      "sha256": "b06e7cf75d909de66ce49bc4188a6dc525224f85dd6dcb36137de3d9321830d1"
+    },
+    "raw/node_year.csv.gz": {
+      "bytes": 73612,
+      "sha256": "fb97e19d6003deb09197f6df6b10ea1ab86ee49d98885836c3c857ab58d897f3"
+    },
+    "raw/num-edge-list.csv.gz": {
+      "bytes": 52,
+      "sha256": "430f1e00ae204bbb3208c5f494ab70170e9f2995fd3548d1754a74a8f59250d1"
+    },
+    "raw/num-node-list.csv.gz": {
+      "bytes": 51,
+      "sha256": "9aa60a342efd209408933ace51e6b0a814e81c2894a993c44f9b173e477e2e82"
+    },
+    "raw/split/time/test.csv.gz": {
+      "bytes": 113234,
+      "sha256": "588fb66ce57bcaef51ac0235f0a49a056370ac31fc27c8ebf556d3f5cdd02545"
+    },
+    "raw/split/time/train.csv.gz": {
+      "bytes": 211044,
+      "sha256": "84983391900af45194e5db8d977ec9e01d4eda96e20328f3d7575fdd45c6797c"
+    },
+    "raw/split/time/valid.csv.gz": {
+      "bytes": 66916,
+      "sha256": "ebe6cdcd77c75eedbce2064a05a49bc28e2c4a631f49d66b9e9ff317eef993eb"
+    },
+    "processed/edge_index.npy": {
+      "bytes": 18660016,
+      "sha256": "aab407d7d75cbf0a296a7ed7007bf75f0466e3f6c90d76e945aa03a6c09d6997"
+    },
+    "processed/node_year.npy": {
+      "bytes": 1354872,
+      "sha256": "af4299ca63a0ae22e17136ac57b63febb55c538d63987306c984e40de0c8441a"
+    },
+    "processed/test_idx.npy": {
+      "bytes": 388952,
+      "sha256": "66fdfeaee81fbe06dca6334a86e110997aaae724bf99da0a9a07021a667df352"
+    },
+    "processed/train_idx.npy": {
+      "bytes": 727656,
+      "sha256": "9b7818b07840d6dd97e865bd9df0d28d2c3fded3ce1f21ed40eee94376af9676"
+    },
+    "processed/valid_idx.npy": {
+      "bytes": 238520,
+      "sha256": "948b40fcf39a827fd7755d771ee3ada48f2ada72c777dbc59c714f2d0532c616"
+    },
+    "processed/x.npy": {
+      "bytes": 86703744,
+      "sha256": "e2e4dda733eff8130a8e3ff0167ce091ee145eb6f0e6eedb8e04fef36100e40b"
+    },
+    "processed/y.npy": {
+      "bytes": 1354872,
+      "sha256": "c8dd0692e9d38bb138be13691546d3953422d93c763ff7a46c3ee7895e40fbb6"
+    }
+  }
+}

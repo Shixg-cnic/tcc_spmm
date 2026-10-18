@@ -1,0 +1,48 @@
+{
+  "name": "dblp",
+  "num_nodes": 17716,
+  "raw_edge_records": 105734,
+  "stored_edge_entries": 105734,
+  "feature_dim": 1639,
+  "num_classes": 4,
+  "source": "https://raw.githubusercontent.com/abojchevski/graph2gauss/master/data/dblp.npz",
+  "graph_policy": "CitationFull homogeneous paper citation graph; symmetric union, remove self loops, deduplicate",
+  "feature_policy": "original supplied values converted to float32; no normalization, padding, truncation or synthetic values",
+  "split": "project-generated stratified 60/20/20 per class, floor train/valid, remainder test; NumPy default_rng seed 42; NOT an official benchmark split",
+  "split_sizes": {
+    "train": 10629,
+    "valid": 3542,
+    "test": 3545
+  },
+  "unassigned_nodes": 0,
+  "files": {
+    "raw/dblp.npz": {
+      "bytes": 22005905,
+      "sha256": "46da600a15c0680d967b3c9ac83979e3c44dfe5a0ef86e1c42a94d8dee1c1da4"
+    },
+    "processed/edge_index.npy": {
+      "bytes": 1691872,
+      "sha256": "c5a6e05bd2161bed04421c3720a73e9f6aa3defd1cc82cdd9babbfa337d24060"
+    },
+    "processed/test_idx.npy": {
+      "bytes": 28488,
+      "sha256": "6b5a8f41d03cd418cddee8b7995c12cb47c4bd1c6bed2d2f0544743ec43a5104"
+    },
+    "processed/train_idx.npy": {
+      "bytes": 85160,
+      "sha256": "be5cae5dbf6f8c745d8af8501ca6f7cec1c3fc01ad3aa52114c47d4db0df5539"
+    },
+    "processed/valid_idx.npy": {
+      "bytes": 28464,
+      "sha256": "cdb210dcd92c6d21ce6192266ecc725a72341a360ac3c580fff9b8631eb59a55"
+    },
+    "processed/x.npy": {
+      "bytes": 116146224,
+      "sha256": "c74ebb7880638d286d2d312e83049e2e1d59eba6b4355710c65dfe62affa6038"
+    },
+    "processed/y.npy": {
+      "bytes": 141856,
+      "sha256": "b3c4030bf845cdd65c8e077ea51cc0f4318b8c03e528e0b293302fd32474ec83"
+    }
+  }
+}

@@ -28,9 +28,12 @@ for name in NAMES:
             for start in range(0,e,1000000):assert np.array_equal(edge[:,e+start:e+min(start+1000000,e)],edge[::-1,start:min(start+1000000,e)])
     # Exercise actual edges, features and labels in a bounded GNN computation;
     # this is a load/forward/backward smoke test, not training or accuracy eval.
-    train=data['split_idx']['train'][:16]
+    candidates=np.intersect1d(data['split_idx']['train'],np.unique(edge[1,:100000]))
+    assert len(candidates)>0, 'no training destinations in sampled edge block'
+    train=candidates[:16]
     mask=np.isin(edge[1,:100000],train)
     sample=edge[:,:100000][:,mask][:,:512]
+    assert sample.shape[1]>0, 'message-passing check must exercise real edges'
     nodes=np.unique(np.concatenate([train,sample.reshape(-1)]))
     local=np.searchsorted(nodes,sample)
     tx=torch.from_numpy(np.array(x[nodes],copy=True));ty=torch.from_numpy(np.array(y[nodes],copy=True))

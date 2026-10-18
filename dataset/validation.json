@@ -10,8 +10,8 @@
       "valid": 29799,
       "test": 48603
     },
-    "message_edges": 21,
-    "smoke_loss": 3.598684310913086,
+    "message_edges": 42,
+    "smoke_loss": 3.5657799243927,
     "passed": true
   },
   {
@@ -25,8 +25,8 @@
       "valid": 39323,
       "test": 2213091
     },
-    "message_edges": 0,
-    "smoke_loss": 4.132426738739014,
+    "message_edges": 18,
+    "smoke_loss": 4.349060535430908,
     "passed": true
   },
   {

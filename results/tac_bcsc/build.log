@@ -1,0 +1,21 @@
+-- Configuring done (0.1s)
+-- Generating done (1.5s)
+-- Build files have been written to: /home/shixingguo/work/GNN/tcc_spmm/build
+[ 66%] Building CUDA object CMakeFiles/tac_bcsc_repro.dir/repro/tac_bcsc/main.cu.o
+[ 66%] Building CXX object CMakeFiles/tac_bcsc_repro.dir/src/format/csr.cpp.o
+/home/shixingguo/work/GNN/tcc_spmm/repro/tac_bcsc/original_kernel.cuh(134): warning #177-D: variable "start_dataIdx" was declared but never referenced
+          vint start_dataIdx = d_data2Idx[start_blk_idx];
+               ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+/home/shixingguo/work/GNN/tcc_spmm/repro/tac_bcsc/original_kernel.cuh(189): warning #177-D: variable "start_dataIdx" was declared but never referenced
+              vint start_dataIdx = d_data2Idx[tc_block];
+                   ^
+
+/home/shixingguo/work/GNN/tcc_spmm/repro/tac_bcsc/original_kernel.cuh(30): warning #177-D: variable "offY" was declared but never referenced
+      vint offY = (blockIdx.y << 7);
+           ^
+
+[100%] Linking CXX executable tac_bcsc_repro
+[100%] Built target tac_bcsc_repro

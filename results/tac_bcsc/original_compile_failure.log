@@ -1,0 +1,116 @@
+[ 66%] Building CUDA object CMakeFiles/tac_bcsc_repro.dir/repro/tac_bcsc/main.cu.o
+[ 66%] Building CXX object CMakeFiles/tac_bcsc_repro.dir/src/format/csr.cpp.o
+In file included from /home/shixingguo/work/GNN/tcc_spmm/TAC_src/TAC/training_backend/c++_frontend/3rd/spmm_cnic_gat_edit_denseC/include/ptx_tf32.h:4,
+                 from /home/shixingguo/work/GNN/tcc_spmm/repro/tac_bcsc/main.cu:2:
+/home/shixingguo/work/GNN/tcc_spmm/TAC_src/TAC/training_backend/c++_frontend/3rd/spmm_cnic_gat_edit_denseC/include/config.h:82: warning: "UINT32_MAX" redefined
+   82 | #define UINT32_MAX   0xFFFFFFFF  // 最大 32 位无符号数
+      | 
+In file included from /usr/lib/gcc/x86_64-linux-gnu/13/include/stdint.h:9,
+                 from /usr/include/c++/13/cstdint:45,
+                 from /home/shixingguo/work/GNN/tcc_spmm/include/csr.cuh:3,
+                 from /home/shixingguo/work/GNN/tcc_spmm/include/column_format.cuh:2,
+                 from /home/shixingguo/work/GNN/tcc_spmm/tests/column_test_utils.cuh:2,
+                 from /home/shixingguo/work/GNN/tcc_spmm/tests/matrix_io.cuh:2,
+                 from /home/shixingguo/work/GNN/tcc_spmm/repro/tac_bcsc/main.cu:1:
+/usr/include/stdint.h:118: note: this is the location of the previous definition
+  118 | # define UINT32_MAX             (4294967295U)
+      | 
+In file included from /home/shixingguo/work/GNN/tcc_spmm/TAC_src/TAC/training_backend/c++_frontend/3rd/spmm_cnic_gat_edit_denseC/include/ptx_tf32.h:4,
+                 from /home/shixingguo/work/GNN/tcc_spmm/repro/tac_bcsc/main.cu:2:
+/home/shixingguo/work/GNN/tcc_spmm/TAC_src/TAC/training_backend/c++_frontend/3rd/spmm_cnic_gat_edit_denseC/include/config.h:82: warning: "UINT32_MAX" redefined
+   82 | #define UINT32_MAX   0xFFFFFFFF  // 最大 32 位无符号数
+      | 
+In file included from /usr/lib/gcc/x86_64-linux-gnu/13/include/stdint.h:9,
+                 from /usr/include/c++/13/cstdint:45,
+                 from /home/shixingguo/work/GNN/tcc_spmm/include/csr.cuh:3,
+                 from /home/shixingguo/work/GNN/tcc_spmm/include/column_format.cuh:2,
+                 from /home/shixingguo/work/GNN/tcc_spmm/tests/column_test_utils.cuh:2,
+                 from /home/shixingguo/work/GNN/tcc_spmm/tests/matrix_io.cuh:2,
+                 from /home/shixingguo/work/GNN/tcc_spmm/repro/tac_bcsc/main.cu:1:
+/usr/include/stdint.h:118: note: this is the location of the previous definition
+  118 | # define UINT32_MAX             (4294967295U)
+      | 
+/home/shixingguo/work/GNN/tcc_spmm/TAC_src/TAC/training_backend/c++_frontend/3rd/spmm_cnic_gat_edit_denseC/include/ptx_tf32.h(135): warning #191-D: type qualifier is meaningless on cast type
+      vint const A0 = static_cast<vint const>(MatA0);
+                                  ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+/home/shixingguo/work/GNN/tcc_spmm/TAC_src/TAC/training_backend/c++_frontend/3rd/spmm_cnic_gat_edit_denseC/include/ptx_tf32.h(136): warning #191-D: type qualifier is meaningless on cast type
+      vint const A1 = static_cast<vint const>(MatA1);
+                                  ^
+
+/home/shixingguo/work/GNN/tcc_spmm/TAC_src/TAC/training_backend/c++_frontend/3rd/spmm_cnic_gat_edit_denseC/include/ptx_tf32.h(137): warning #191-D: type qualifier is meaningless on cast type
+      vint const A2 = static_cast<vint const>(MatA2);
+                                  ^
+
+/home/shixingguo/work/GNN/tcc_spmm/TAC_src/TAC/training_backend/c++_frontend/3rd/spmm_cnic_gat_edit_denseC/include/ptx_tf32.h(138): warning #191-D: type qualifier is meaningless on cast type
+      vint const A3 = static_cast<vint const>(MatA3);
+                                  ^
+
+/home/shixingguo/work/GNN/tcc_spmm/TAC_src/TAC/training_backend/c++_frontend/3rd/spmm_cnic_gat_edit_denseC/include/ptx_tf32.h(139): warning #191-D: type qualifier is meaningless on cast type
+      vint const B0 = static_cast<vint const>(MatB0);
+                                  ^
+
+/home/shixingguo/work/GNN/tcc_spmm/TAC_src/TAC/training_backend/c++_frontend/3rd/spmm_cnic_gat_edit_denseC/include/ptx_tf32.h(140): warning #191-D: type qualifier is meaningless on cast type
+      vint const B1 = static_cast<vint const>(MatB1);
+                                  ^
+
+/home/shixingguo/work/GNN/tcc_spmm/TAC_src/TAC/training_backend/c++_frontend/3rd/spmm_cnic_gat_edit_denseC/include/ptx_tf32.h(135): warning #191-D: type qualifier is meaningless on cast type
+      vint const A0 = static_cast<vint const>(MatA0);
+                                  ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+/home/shixingguo/work/GNN/tcc_spmm/TAC_src/TAC/training_backend/c++_frontend/3rd/spmm_cnic_gat_edit_denseC/include/ptx_tf32.h(136): warning #191-D: type qualifier is meaningless on cast type
+      vint const A1 = static_cast<vint const>(MatA1);
+                                  ^
+
+/home/shixingguo/work/GNN/tcc_spmm/TAC_src/TAC/training_backend/c++_frontend/3rd/spmm_cnic_gat_edit_denseC/include/ptx_tf32.h(137): warning #191-D: type qualifier is meaningless on cast type
+      vint const A2 = static_cast<vint const>(MatA2);
+                                  ^
+
+/home/shixingguo/work/GNN/tcc_spmm/TAC_src/TAC/training_backend/c++_frontend/3rd/spmm_cnic_gat_edit_denseC/include/ptx_tf32.h(138): warning #191-D: type qualifier is meaningless on cast type
+      vint const A3 = static_cast<vint const>(MatA3);
+                                  ^
+
+/home/shixingguo/work/GNN/tcc_spmm/TAC_src/TAC/training_backend/c++_frontend/3rd/spmm_cnic_gat_edit_denseC/include/ptx_tf32.h(139): warning #191-D: type qualifier is meaningless on cast type
+      vint const B0 = static_cast<vint const>(MatB0);
+                                  ^
+
+/home/shixingguo/work/GNN/tcc_spmm/TAC_src/TAC/training_backend/c++_frontend/3rd/spmm_cnic_gat_edit_denseC/include/ptx_tf32.h(140): warning #191-D: type qualifier is meaningless on cast type
+      vint const B1 = static_cast<vint const>(MatB1);
+                                  ^
+
+/home/shixingguo/work/GNN/tcc_spmm/repro/tac_bcsc/original_kernel.cuh(134): warning #177-D: variable "start_dataIdx" was declared but never referenced
+          vint start_dataIdx = d_data2Idx[start_blk_idx];
+               ^
+
+/home/shixingguo/work/GNN/tcc_spmm/repro/tac_bcsc/original_kernel.cuh(189): warning #177-D: variable "start_dataIdx" was declared but never referenced
+              vint start_dataIdx = d_data2Idx[tc_block];
+                   ^
+
+/home/shixingguo/work/GNN/tcc_spmm/repro/tac_bcsc/original_kernel.cuh(30): warning #177-D: variable "offY" was declared but never referenced
+      vint offY = (blockIdx.y << 7);
+           ^
+
+ptxas /home/shixingguo/work/GNN/tcc_spmm/build/tmp/tmpxft_001b7d2d_00000000-6_main.ptx, line 744; error   : Arguments mismatch for instruction 'cvt'
+ptxas /home/shixingguo/work/GNN/tcc_spmm/build/tmp/tmpxft_001b7d2d_00000000-6_main.ptx, line 755; error   : Arguments mismatch for instruction 'cvt'
+ptxas /home/shixingguo/work/GNN/tcc_spmm/build/tmp/tmpxft_001b7d2d_00000000-6_main.ptx, line 766; error   : Arguments mismatch for instruction 'cvt'
+ptxas /home/shixingguo/work/GNN/tcc_spmm/build/tmp/tmpxft_001b7d2d_00000000-6_main.ptx, line 777; error   : Arguments mismatch for instruction 'cvt'
+ptxas /home/shixingguo/work/GNN/tcc_spmm/build/tmp/tmpxft_001b7d2d_00000000-6_main.ptx, line 788; error   : Arguments mismatch for instruction 'cvt'
+ptxas /home/shixingguo/work/GNN/tcc_spmm/build/tmp/tmpxft_001b7d2d_00000000-6_main.ptx, line 799; error   : Arguments mismatch for instruction 'cvt'
+ptxas /home/shixingguo/work/GNN/tcc_spmm/build/tmp/tmpxft_001b7d2d_00000000-6_main.ptx, line 810; error   : Arguments mismatch for instruction 'cvt'
+ptxas /home/shixingguo/work/GNN/tcc_spmm/build/tmp/tmpxft_001b7d2d_00000000-6_main.ptx, line 821; error   : Arguments mismatch for instruction 'cvt'
+ptxas /home/shixingguo/work/GNN/tcc_spmm/build/tmp/tmpxft_001b7d2d_00000000-6_main.ptx, line 845; error   : Arguments mismatch for instruction 'cvt'
+ptxas /home/shixingguo/work/GNN/tcc_spmm/build/tmp/tmpxft_001b7d2d_00000000-6_main.ptx, line 856; error   : Arguments mismatch for instruction 'cvt'
+ptxas /home/shixingguo/work/GNN/tcc_spmm/build/tmp/tmpxft_001b7d2d_00000000-6_main.ptx, line 867; error   : Arguments mismatch for instruction 'cvt'
+ptxas /home/shixingguo/work/GNN/tcc_spmm/build/tmp/tmpxft_001b7d2d_00000000-6_main.ptx, line 878; error   : Arguments mismatch for instruction 'cvt'
+ptxas /home/shixingguo/work/GNN/tcc_spmm/build/tmp/tmpxft_001b7d2d_00000000-6_main.ptx, line 897; error   : Arguments mismatch for instruction 'cvt'
+ptxas /home/shixingguo/work/GNN/tcc_spmm/build/tmp/tmpxft_001b7d2d_00000000-6_main.ptx, line 908; error   : Arguments mismatch for instruction 'cvt'
+ptxas /home/shixingguo/work/GNN/tcc_spmm/build/tmp/tmpxft_001b7d2d_00000000-6_main.ptx, line 927; error   : Arguments mismatch for instruction 'cvt'
+ptxas fatal   : Ptx assembly aborted due to errors
+gmake[3]: *** [CMakeFiles/tac_bcsc_repro.dir/build.make:77: CMakeFiles/tac_bcsc_repro.dir/repro/tac_bcsc/main.cu.o] Error 255
+gmake[2]: *** [CMakeFiles/Makefile2:643: CMakeFiles/tac_bcsc_repro.dir/all] Error 2
+gmake[1]: *** [CMakeFiles/Makefile2:650: CMakeFiles/tac_bcsc_repro.dir/rule] Error 2
+gmake: *** [Makefile:394: tac_bcsc_repro] Error 2

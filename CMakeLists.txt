@@ -148,3 +148,10 @@ add_executable(benchmark_q4_round2 bench/benchmark_q4_round2.cu tests/acc_refere
 target_include_directories(benchmark_q4_round2 PRIVATE tests ${CUSPARSE_INCLUDE_DIR} ${CUBLAS_INCLUDE_DIR})
 target_compile_options(benchmark_q4_round2 PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-O3>)
 target_link_libraries(benchmark_q4_round2 PRIVATE tcc_spmm)
+
+# Isolated TAC BCSC reproduction: no training/IPC or project SpMM kernels.
+add_executable(tac_bcsc_repro repro/tac_bcsc/main.cu src/format/csr.cpp)
+target_include_directories(tac_bcsc_repro PRIVATE tests include)
+target_compile_options(tac_bcsc_repro PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-O3>)
+target_link_libraries(tac_bcsc_repro PRIVATE CUDA::cudart)
+add_test(NAME tac_bcsc_correctness COMMAND tac_bcsc_repro --test)

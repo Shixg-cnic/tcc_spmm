@@ -1,0 +1,14 @@
+[ 66%] Building CUDA object CMakeFiles/tac_bcsr_repro.dir/repro/tac_bcsr/main.cu.o
+[ 66%] Building CXX object CMakeFiles/tac_bcsr_repro.dir/src/format/csr.cpp.o
+/home/shixingguo/work/GNN/tcc_spmm/repro/tac_bcsr/original_kernel.cuh(77): warning #177-D: variable "start_dataIdx" was declared but never referenced
+          vint start_dataIdx = d_data2Idx[start_blk_idx];
+               ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+
+/home/shixingguo/work/GNN/tcc_spmm/repro/tac_bcsr/original_kernel.cuh(203): warning #177-D: variable "start_dataIdx" was declared but never referenced
+              vint start_dataIdx = d_data2Idx[tc_block];
+                   ^
+
+[100%] Linking CXX executable tac_bcsr_repro
+[100%] Built target tac_bcsr_repro

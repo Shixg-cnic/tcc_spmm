@@ -1,0 +1,2 @@
+matrix,rows,cols,nnz,F,tiles,empty_windows,convert_ms,kernel_ms,clear_kernel_ms,relative_l2,max_abs
+data/ogbn_products_full.csr,2449029,2449029,126167053,256,15896497,0,4795.63581,70.2603226,71.7853851,2.56827052e-06,0.432617188

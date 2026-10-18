@@ -1,0 +1,8 @@
+Internal ctest changing into directory: /home/shixingguo/work/GNN/tcc_spmm/build
+Test project /home/shixingguo/work/GNN/tcc_spmm/build
+    Start 9: tac_bcsr_correctness
+1/1 Test #9: tac_bcsr_correctness .............   Passed    0.43 sec
+
+100% tests passed, 0 tests failed out of 1
+
+Total Test time (real) =   0.45 sec

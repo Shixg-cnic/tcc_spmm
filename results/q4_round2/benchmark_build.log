@@ -1,0 +1,36 @@
+[ 81%] Built target tcc_spmm
+[ 93%] Building CUDA object CMakeFiles/benchmark_q4_round2.dir/bench/benchmark_q4_round2.cu.o
+[ 93%] Building CUDA object CMakeFiles/benchmark_q4_round2.dir/tests/acc_reference.cu.o
+[100%] Linking CXX executable benchmark_q4_round2
+[100%] Built target benchmark_q4_round2
+[ 81%] Built target tcc_spmm
+[ 87%] Linking CXX executable row_spmm_test
+[100%] Built target row_spmm_test
+[ 86%] Built target tcc_spmm
+[ 93%] Linking CXX executable column_spmm_test
+[100%] Built target column_spmm_test
+[ 86%] Built target tcc_spmm
+[ 93%] Linking CXX executable adaptive_sw_test
+[100%] Built target adaptive_sw_test
+[ 86%] Built target tcc_spmm
+[ 93%] Linking CXX executable int4_test
+[100%] Built target int4_test
+[ 86%] Built target tcc_spmm
+[ 93%] Linking CXX executable column_fast_test
+[100%] Built target column_fast_test
+[ 81%] Built target tcc_spmm
+[ 87%] Linking CXX executable cw_order_test
+[100%] Built target cw_order_test
+[  6%] Building CXX object CMakeFiles/tcc_spmm.dir/src/format/column_q4.cpp.o
+[ 13%] Linking CXX static library libtcc_spmm.a
+[ 86%] Built target tcc_spmm
+[ 93%] Building CUDA object CMakeFiles/q4_test.dir/tests/q4_test.cu.o
+[100%] Linking CXX executable q4_test
+[100%] Built target q4_test
+[ 81%] Built target tcc_spmm
+[ 87%] Linking CXX executable benchmark_q4_round2
+[100%] Built target benchmark_q4_round2
+[ 86%] Built target tcc_spmm
+[ 93%] Building CUDA object CMakeFiles/q4_test.dir/tests/q4_test.cu.o
+[100%] Linking CXX executable q4_test
+[100%] Built target q4_test

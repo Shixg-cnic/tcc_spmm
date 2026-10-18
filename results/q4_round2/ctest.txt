@@ -1,0 +1,20 @@
+Internal ctest changing into directory: /home/shixingguo/work/GNN/tcc_spmm/build
+Test project /home/shixingguo/work/GNN/tcc_spmm/build
+    Start 1: row_spmm_correctness
+1/7 Test #1: row_spmm_correctness .............   Passed    0.41 sec
+    Start 2: column_spmm_correctness
+2/7 Test #2: column_spmm_correctness ..........   Passed    0.49 sec
+    Start 3: adaptive_sw_correctness
+3/7 Test #3: adaptive_sw_correctness ..........   Passed    0.43 sec
+    Start 4: int4_correctness
+4/7 Test #4: int4_correctness .................   Passed    0.49 sec
+    Start 5: column_fast_correctness
+5/7 Test #5: column_fast_correctness ..........   Passed    0.00 sec
+    Start 6: cw_order_correctness
+6/7 Test #6: cw_order_correctness .............   Passed    0.38 sec
+    Start 7: q4_correctness
+7/7 Test #7: q4_correctness ...................   Passed    0.61 sec
+
+100% tests passed, 0 tests failed out of 7
+
+Total Test time (real) =   2.87 sec

@@ -1,0 +1,6 @@
+arxiv F128: tasks=5292, CW=21168, T/P/U/peak, local-window and bucket permutation checks passed
+arxiv F256: tasks=5292, CW=21168, T/P/U/peak, local-window and bucket permutation checks passed
+arxiv: all SW statistics and shuffled positions identical across F128/F256
+products F128: tasks=76533, CW=306129, T/P/U/peak, local-window and bucket permutation checks passed
+products F256: tasks=76533, CW=306129, T/P/U/peak, local-window and bucket permutation checks passed
+products: all SW statistics and shuffled positions identical across F128/F256

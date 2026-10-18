@@ -143,3 +143,8 @@ add_executable(benchmark_q4 bench/benchmark_q4.cu tests/acc_reference.cu)
 target_include_directories(benchmark_q4 PRIVATE tests ${CUSPARSE_INCLUDE_DIR} ${CUBLAS_INCLUDE_DIR})
 target_compile_options(benchmark_q4 PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-O3>)
 target_link_libraries(benchmark_q4 PRIVATE tcc_spmm)
+
+add_executable(benchmark_q4_round2 bench/benchmark_q4_round2.cu tests/acc_reference.cu)
+target_include_directories(benchmark_q4_round2 PRIVATE tests ${CUSPARSE_INCLUDE_DIR} ${CUBLAS_INCLUDE_DIR})
+target_compile_options(benchmark_q4_round2 PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-O3>)
+target_link_libraries(benchmark_q4_round2 PRIVATE tcc_spmm)

@@ -1,0 +1,26 @@
+building identity/grouped formats
+verified Acc H=0 regs=44 shared=576 blocks=10
+verified Q1_identity H=0 regs=34 shared=256 blocks=12
+verified Q1_grouped H=0 regs=34 shared=256 blocks=12
+verified Q4_sync_H32 H=32 regs=60 shared=17152 blocks=5
+verified Q4_float4_H32 H=32 regs=64 shared=17152 blocks=5
+verified Q4_bits_H32 H=32 regs=59 shared=17152 blocks=5
+verified Q4_scalar_pipeline_H32 H=32 regs=66 shared=17408 blocks=5
+verified Q4_float4_pipeline_H32 H=32 regs=64 shared=17408 blocks=5
+verified Q4_bits_H24 H=24 regs=59 shared=12928 blocks=7
+verified Q4_scalar_pipeline_H24 H=24 regs=66 shared=13184 blocks=7
+verified Q4_float4_pipeline_H24 H=24 regs=64 shared=13184 blocks=7
+verified Q4_bits_H16 H=16 regs=59 shared=8704 blocks=8
+verified Q4_scalar_pipeline_H16 H=16 regs=66 shared=8960 blocks=7
+verified Q4_float4_pipeline_H16 H=16 regs=64 shared=8960 blocks=8
+verified Q4_bits_auto_xor H=16 regs=66 shared=8704 blocks=7
+verified Q4_bits_auto_xor_shuffle H=16 regs=66 shared=8704 blocks=7
+verified Q4_scalar_pipeline_auto_xor H=16 regs=66 shared=8960 blocks=7
+verified Q4_scalar_pipeline_auto_xor_shuffle H=16 regs=66 shared=8960 blocks=7
+verified Q4_float4_pipeline_auto_xor H=16 regs=72 shared=8960 blocks=7
+verified Q4_float4_pipeline_auto_xor_shuffle H=16 regs=72 shared=8960 blocks=7
+completed interleaved round 0
+completed interleaved round 1
+completed interleaved round 2
+completed interleaved round 3
+completed interleaved round 4

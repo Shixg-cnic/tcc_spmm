@@ -1,0 +1,1 @@
+Q4 structure, lifetimes, deterministic grouping, fallback all H/layout/async/output variants, bank enumeration and task shuffle passed

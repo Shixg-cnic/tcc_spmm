@@ -9,17 +9,19 @@ void tf32_m16n8k8(float* MatA, float* MatB, float* MatC) {
     float* C        = reinterpret_cast<float*>(MatC);
 
     asm volatile(
-        "cvt.rna.tf32.f32 %4, %4;\n"
-        "cvt.rna.tf32.f32 %5, %5;\n"
-        "cvt.rna.tf32.f32 %6, %6;\n"
-        "cvt.rna.tf32.f32 %7, %7;\n"
-        "cvt.rna.tf32.f32 %8, %8;\n"
-        "cvt.rna.tf32.f32 %9, %9;\n"
+        "{\n"
+        ".reg .b32 ta<4>, tb<2>;\n"
+        "cvt.rna.tf32.f32 ta0, %4;\n"
+        "cvt.rna.tf32.f32 ta1, %5;\n"
+        "cvt.rna.tf32.f32 ta2, %6;\n"
+        "cvt.rna.tf32.f32 ta3, %7;\n"
+        "cvt.rna.tf32.f32 tb0, %8;\n"
+        "cvt.rna.tf32.f32 tb1, %9;\n"
         "mma.sync.aligned.m16n8k8.row.col.f32.tf32.tf32.f32"
         "{%0, %1, %2, %3},"
-        "{%4, %5, %6, %7},"
-        "{%8, %9},"
-        "{%0, %1, %2, %3};\n"
+        "{ta0, ta1, ta2, ta3},"
+        "{tb0, tb1},"
+        "{%0, %1, %2, %3};\n}"
         :"+f"(C[0]), "+f"(C[1]), "+f"(C[2]), "+f"(C[3])      // output
         :"r"(A[0]), "r"(A[1]), "r"(A[2]), "r"(A[3]),
          "r"(B[0]), "r"(B[1])

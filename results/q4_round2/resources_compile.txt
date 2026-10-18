@@ -1,0 +1,123 @@
+_ZN45_GLOBAL__N__cc7bafcc_12_column_q4_cu_0bffd5976kernelILb0ELb1ELb0ELb1ELj32ELb1EEEv8DeviceQ4PKfPfj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 66 registers, used 1 barriers, 17408 bytes smem
+
+_ZN45_GLOBAL__N__cc7bafcc_12_column_q4_cu_0bffd5976kernelILb0ELb1ELb1ELb1ELj32ELb1EEEv8DeviceQ4PKfPfj
+    8 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 72 registers, used 1 barriers, 8 bytes cumulative stack size, 17408 bytes smem
+
+_ZN45_GLOBAL__N__cc7bafcc_12_column_q4_cu_0bffd5976kernelILb0ELb1ELb1ELb0ELj32ELb1EEEv8DeviceQ4PKfPfj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 72 registers, used 1 barriers, 17152 bytes smem
+
+_ZN45_GLOBAL__N__cc7bafcc_12_column_q4_cu_0bffd5976kernelILb0ELb1ELb0ELb0ELj32ELb1EEEv8DeviceQ4PKfPfj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 66 registers, used 1 barriers, 17152 bytes smem
+
+_ZN45_GLOBAL__N__cc7bafcc_12_column_q4_cu_0bffd5976kernelILb0ELb0ELb0ELb0ELj32ELb1EEEv8DeviceQ4PKfPfj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 68 registers, used 1 barriers, 17152 bytes smem
+
+_ZN45_GLOBAL__N__cc7bafcc_12_column_q4_cu_0bffd5976kernelILb0ELb1ELb0ELb1ELj24ELb0EEEv8DeviceQ4PKfPfj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 66 registers, used 1 barriers, 13184 bytes smem
+
+_ZN45_GLOBAL__N__cc7bafcc_12_column_q4_cu_0bffd5976kernelILb0ELb1ELb1ELb1ELj24ELb0EEEv8DeviceQ4PKfPfj
+    8 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 64 registers, used 1 barriers, 8 bytes cumulative stack size, 13184 bytes smem
+
+_ZN45_GLOBAL__N__cc7bafcc_12_column_q4_cu_0bffd5976kernelILb0ELb1ELb1ELb0ELj24ELb0EEEv8DeviceQ4PKfPfj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 64 registers, used 1 barriers, 12928 bytes smem
+
+_ZN45_GLOBAL__N__cc7bafcc_12_column_q4_cu_0bffd5976kernelILb0ELb1ELb0ELb0ELj24ELb0EEEv8DeviceQ4PKfPfj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 59 registers, used 1 barriers, 12928 bytes smem
+
+_ZN45_GLOBAL__N__cc7bafcc_12_column_q4_cu_0bffd5976kernelILb0ELb0ELb0ELb0ELj24ELb0EEEv8DeviceQ4PKfPfj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 60 registers, used 1 barriers, 12928 bytes smem
+
+_ZN45_GLOBAL__N__cc7bafcc_12_column_q4_cu_0bffd5976kernelILb0ELb1ELb0ELb1ELj24ELb1EEEv8DeviceQ4PKfPfj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 66 registers, used 1 barriers, 13184 bytes smem
+
+_ZN45_GLOBAL__N__cc7bafcc_12_column_q4_cu_0bffd5976kernelILb0ELb1ELb1ELb1ELj24ELb1EEEv8DeviceQ4PKfPfj
+    8 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 72 registers, used 1 barriers, 8 bytes cumulative stack size, 13184 bytes smem
+
+_ZN45_GLOBAL__N__cc7bafcc_12_column_q4_cu_0bffd5976kernelILb0ELb1ELb1ELb0ELj24ELb1EEEv8DeviceQ4PKfPfj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 72 registers, used 1 barriers, 12928 bytes smem
+
+_ZN45_GLOBAL__N__cc7bafcc_12_column_q4_cu_0bffd5976kernelILb0ELb1ELb0ELb0ELj24ELb1EEEv8DeviceQ4PKfPfj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 66 registers, used 1 barriers, 12928 bytes smem
+
+_ZN45_GLOBAL__N__cc7bafcc_12_column_q4_cu_0bffd5976kernelILb0ELb0ELb0ELb0ELj24ELb1EEEv8DeviceQ4PKfPfj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 68 registers, used 1 barriers, 12928 bytes smem
+
+_ZN45_GLOBAL__N__cc7bafcc_12_column_q4_cu_0bffd5976kernelILb0ELb1ELb0ELb1ELj16ELb0EEEv8DeviceQ4PKfPfj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 66 registers, used 1 barriers, 8960 bytes smem
+
+_ZN45_GLOBAL__N__cc7bafcc_12_column_q4_cu_0bffd5976kernelILb0ELb1ELb1ELb1ELj16ELb0EEEv8DeviceQ4PKfPfj
+    8 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 64 registers, used 1 barriers, 8 bytes cumulative stack size, 8960 bytes smem
+
+_ZN45_GLOBAL__N__cc7bafcc_12_column_q4_cu_0bffd5976kernelILb0ELb1ELb1ELb0ELj16ELb0EEEv8DeviceQ4PKfPfj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 64 registers, used 1 barriers, 8704 bytes smem
+
+_ZN45_GLOBAL__N__cc7bafcc_12_column_q4_cu_0bffd5976kernelILb0ELb1ELb0ELb0ELj16ELb0EEEv8DeviceQ4PKfPfj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 59 registers, used 1 barriers, 8704 bytes smem
+
+_ZN45_GLOBAL__N__cc7bafcc_12_column_q4_cu_0bffd5976kernelILb0ELb0ELb0ELb0ELj16ELb0EEEv8DeviceQ4PKfPfj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 60 registers, used 1 barriers, 8704 bytes smem
+
+_ZN45_GLOBAL__N__cc7bafcc_12_column_q4_cu_0bffd5976kernelILb0ELb1ELb0ELb1ELj16ELb1EEEv8DeviceQ4PKfPfj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 66 registers, used 1 barriers, 8960 bytes smem
+
+_ZN45_GLOBAL__N__cc7bafcc_12_column_q4_cu_0bffd5976kernelILb0ELb1ELb1ELb1ELj16ELb1EEEv8DeviceQ4PKfPfj
+    8 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 72 registers, used 1 barriers, 8 bytes cumulative stack size, 8960 bytes smem
+
+_ZN45_GLOBAL__N__cc7bafcc_12_column_q4_cu_0bffd5976kernelILb0ELb1ELb1ELb0ELj16ELb1EEEv8DeviceQ4PKfPfj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 72 registers, used 1 barriers, 8704 bytes smem
+
+_ZN45_GLOBAL__N__cc7bafcc_12_column_q4_cu_0bffd5976kernelILb0ELb1ELb0ELb0ELj16ELb1EEEv8DeviceQ4PKfPfj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 66 registers, used 1 barriers, 8704 bytes smem
+
+_ZN45_GLOBAL__N__cc7bafcc_12_column_q4_cu_0bffd5976kernelILb0ELb0ELb0ELb0ELj16ELb1EEEv8DeviceQ4PKfPfj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 68 registers, used 1 barriers, 8704 bytes smem
+
+_ZN45_GLOBAL__N__cc7bafcc_12_column_q4_cu_0bffd5976kernelILb0ELb1ELb0ELb1ELj32ELb0EEEv8DeviceQ4PKfPfj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 66 registers, used 1 barriers, 17408 bytes smem
+
+_ZN45_GLOBAL__N__cc7bafcc_12_column_q4_cu_0bffd5976kernelILb0ELb1ELb1ELb1ELj32ELb0EEEv8DeviceQ4PKfPfj
+    8 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 64 registers, used 1 barriers, 8 bytes cumulative stack size, 17408 bytes smem
+
+_ZN45_GLOBAL__N__cc7bafcc_12_column_q4_cu_0bffd5976kernelILb0ELb1ELb1ELb0ELj32ELb0EEEv8DeviceQ4PKfPfj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 64 registers, used 1 barriers, 17152 bytes smem
+
+_ZN45_GLOBAL__N__cc7bafcc_12_column_q4_cu_0bffd5976kernelILb0ELb1ELb0ELb0ELj32ELb0EEEv8DeviceQ4PKfPfj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 59 registers, used 1 barriers, 17152 bytes smem
+
+_ZN45_GLOBAL__N__cc7bafcc_12_column_q4_cu_0bffd5976kernelILb0ELb0ELb0ELb0ELj32ELb0EEEv8DeviceQ4PKfPfj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 60 registers, used 1 barriers, 17152 bytes smem
+
+_ZN45_GLOBAL__N__cc7bafcc_12_column_q4_cu_0bffd5976kernelILb1ELb1ELb0ELb0ELj32ELb0EEEv8DeviceQ4PKfPfj
+    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads
+ptxas info    : Used 34 registers, used 1 barriers, 256 bytes smem

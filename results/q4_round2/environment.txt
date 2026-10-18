@@ -1,0 +1,20 @@
+index, name, uuid, driver_version, memory.total [MiB]
+0, NVIDIA GeForce RTX 5090, GPU-b5f8e180-c156-522e-fb60-cc3f659106f8, 580.105.08, 32607 MiB
+1, NVIDIA GeForce RTX 5090, GPU-40ed18d5-a82c-390a-c124-0e9374f1add6, 580.105.08, 32607 MiB
+nvcc: NVIDIA (R) Cuda compiler driver
+Copyright (c) 2005-2025 NVIDIA Corporation
+Built on Fri_Feb_21_20:23:50_PST_2025
+Cuda compilation tools, release 12.8, V12.8.93
+Build cuda_12.8.r12.8/compiler.35583870_0
+3b86a7e8958362ac588966b43961b5f6fec623c8
+Main benchmarks: GPU 0, sequential dataset/F runs. Sanitizer/regression: GPU 1.
+Compilation: sm_120, Release, CUDA -O3, C++ -O3.
+Timing: 10 full calls per graph, 10-call warmup per method, 5 interleaved rounds.
+Fixed measurement-order seed: mt19937(20261018); positions and all samples saved.
+All calls include Y clear; Acc uses padded rows, Q1/Q4 logical rows.
+All configurations share X, Y, grouped format, internal execution plan, GPU and stream.
+Task perturbation replaces only the task table pointer; source groups unchanged.
+X from data/ogbn_{arxiv,products}_full.x.bin; F repeats existing width if required.
+Above revision is the pre-change base; current source changes not yet committed.
+3bb7423e35450c94b0936e8f19d914f50f5d6b3a9fbfd894fa90436f0550190a  build/benchmark_q4_round2
+4983d2dbd40cd0bb664bf6a370f421f2fb0414972f6e51f50a7b082db714876e  build/q4_test

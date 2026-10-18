@@ -19,23 +19,23 @@ template<bool Convert> __device__ __forceinline__ Fragment loadX(DeviceQ4 m,cons
     }
     return out;
 }
-template<bool Async> __device__ __forceinline__ void stage(DeviceQ4 m,U tile,float* a) {
+template<bool Async,bool XorA> __device__ __forceinline__ void stage(DeviceQ4 m,U tile,float* a) {
     U t=threadIdx.x;
+    U physical=XorA?(t^((t>>3)&4)):t;
     if(t<64) {
         auto bits=m.bitmap[tile];
         if(bits&(1ULL<<t)) {
             auto ptr=m.values+m.valueOffset[tile]+__popcll(bits&((1ULL<<t)-1));
-            if constexpr(Async) async_copy(U(__cvta_generic_to_shared(a+t)),ptr);
-            else a[t]=*ptr;
-        } else a[t]=0;
+            if constexpr(Async) async_copy(U(__cvta_generic_to_shared(a+physical)),ptr);
+            else a[physical]=*ptr;
+        } else a[physical]=0;
     }
     if constexpr(Async) asm volatile("cp.async.commit_group;" ::: "memory");
 }
-template<int V> __global__ void kernel(DeviceQ4 m,const float* x,float* y,U F) {
-    constexpr bool Q1=V==0,Convert=V!=1,Wide=V>=3,Pipeline=V==4;
+template<bool Q1,bool Convert,bool Wide,bool Pipeline,unsigned H,bool XorA> __global__ void kernel(DeviceQ4 m,const float* x,float* y,U F) {
     __shared__ float a[Pipeline?2:1][64];
-    // Q1 has no output cache; other variants have exactly 32 x 132 floats.
-    __shared__ float cache[Q1?1:32][Q1?1:132];
+    // H changes physical capacity only; token slot decoding remains &31.
+    __shared__ float cache[Q1?1:H][Q1?1:132];
     U f=blockIdx.y*128+(threadIdx.x/32)*32,g=(threadIdx.x%32)/4,k=threadIdx.x%4;
     Q4Task task{};
     if constexpr(Q1) {task.cw[0]=blockIdx.x;task.count=1;task.begin=m.cwOffset[blockIdx.x];task.end=m.cwOffset[blockIdx.x+1];}
@@ -48,15 +48,17 @@ template<int V> __global__ void kernel(DeviceQ4 m,const float* x,float* y,U F) {
         x3=loadX<Convert>(m,x,task.cw[3],f,F,task.count>3);
     }
     if constexpr(Pipeline) {
-        if(task.begin<task.end) stage<false>(m,m.tileOrder[task.begin],a[0]);
+        if(task.begin<task.end) stage<false,XorA>(m,m.tileOrder[task.begin],a[0]);
         __syncthreads();
     }
     for(U o=task.begin;o<task.end;++o) {
         U tile=Q1?o:m.tileOrder[o],buf=Pipeline?((o-task.begin)&1):0;
-        if constexpr(Pipeline) {if(o+1<task.end) stage<true>(m,m.tileOrder[o+1],a[buf^1]);}
-        else {stage<false>(m,tile,a[0]);__syncthreads();}
+        if constexpr(Pipeline) {if(o+1<task.end) stage<true,XorA>(m,m.tileOrder[o+1],a[buf^1]);}
+        else {stage<false,XorA>(m,tile,a[0]);__syncthreads();}
         U cw=Q1?0:m.orderCW[o];
-        U sparse[2]={toTf32RnaBits(a[buf][g*8+k]),toTf32RnaBits(a[buf][g*8+k+4])};
+        U swizzle=XorA?(g&4):0;
+        float a0=a[buf][g*8+(k^swizzle)],a1=a[buf][g*8+((k+4)^swizzle)];
+        U sparse[2]={toTf32RnaBits(a0),toTf32RnaBits(a1)};
         #pragma unroll
         for(int part=0;part<2;++part) {
             float c[4]; U tokens[2];
@@ -75,7 +77,7 @@ template<int V> __global__ void kernel(DeviceQ4 m,const float* x,float* y,U F) {
                     default:mmaTf32Bits(x3.bits[part],sparse,c);break;
                 }
             } else {
-                float b[4],s[2]={a[buf][g*8+k],a[buf][g*8+k+4]};
+                float b[4],s[2]={a0,a1};
                 #pragma unroll
                 for(int i=0;i<4;++i) b[i]=__uint_as_float(cw==0?x0.bits[part][i]:cw==1?x1.bits[part][i]:cw==2?x2.bits[part][i]:x3.bits[part][i]);
                 tf32_m16n8k8(b,s,c);
@@ -115,35 +117,50 @@ template<int V> __global__ void kernel(DeviceQ4 m,const float* x,float* y,U F) {
         __syncthreads();
     }
 }
-const void* pointer(Q4Version v) {
+
+// Independent compile-time switches: asynchronous A never implies float4 output.
+template<unsigned H,bool XorA> const void* pointer(Q4Version v) {
     switch(v) {
-        case Q4Version::Q1:return (const void*)kernel<0>;
-        case Q4Version::Sync:return (const void*)kernel<1>;
-        case Q4Version::Bits:return (const void*)kernel<2>;
-        case Q4Version::Float4:return (const void*)kernel<3>;
-        case Q4Version::Pipeline:return (const void*)kernel<4>;
+        case Q4Version::Q1:return (const void*)kernel<true,true,false,false,32,false>;
+        case Q4Version::Sync:return (const void*)kernel<false,false,false,false,H,XorA>;
+        case Q4Version::Bits:return (const void*)kernel<false,true,false,false,H,XorA>;
+        case Q4Version::Float4:return (const void*)kernel<false,true,true,false,H,XorA>;
+        case Q4Version::Pipeline:return (const void*)kernel<false,true,true,true,H,XorA>;
+        case Q4Version::ScalarPipeline:return (const void*)kernel<false,true,false,true,H,XorA>;
+    }
+    return nullptr;
+}
+const void* pointer(Q4Config c,unsigned peak) {
+    if(c.version==Q4Version::Q1) return pointer<32,false>(c.version);
+    unsigned h=c.cacheSlots?c.cacheSlots:peak<=16?16:peak<=24?24:32;
+    if(peak>h||peak>32) return nullptr;
+    switch(h) {
+        case 16:return c.xorA?pointer<16,true>(c.version):pointer<16,false>(c.version);
+        case 24:return c.xorA?pointer<24,true>(c.version):pointer<24,false>(c.version);
+        case 32:return c.xorA?pointer<32,true>(c.version):pointer<32,false>(c.version);
     }
     return nullptr;
 }
 }
-cudaError_t launchQ4(const DeviceQ4& m,const float* x,float* y,U F,Q4Version v,cudaStream_t stream,bool clear) {
-    if(!m.rows||!m.cols||!x||!y||(F!=128&&F!=256)||!pointer(v)) return cudaErrorInvalidValue;
+cudaError_t launchQ4(const DeviceQ4& m,const float* x,float* y,U F,Q4Config config,cudaStream_t stream,bool clear) {
+    auto p=pointer(config,m.peakSlots);
+    if(!m.rows||!m.cols||!x||!y||(F!=128&&F!=256)||!p) return cudaErrorInvalidValue;
     if(clear) {auto err=cudaMemsetAsync(y,0,std::size_t(m.rows)*F*sizeof(float),stream);if(err!=cudaSuccess)return err;}
-    U count=v==Q4Version::Q1?m.windows:m.taskCount;
+    U count=config.version==Q4Version::Q1?m.windows:m.taskCount;
     if(!count) return cudaSuccess;
-    dim3 grid(count,F/128);
-    switch(v) {
-        case Q4Version::Q1:kernel<0><<<grid,128,0,stream>>>(m,x,y,F);break;
-        case Q4Version::Sync:kernel<1><<<grid,128,0,stream>>>(m,x,y,F);break;
-        case Q4Version::Bits:kernel<2><<<grid,128,0,stream>>>(m,x,y,F);break;
-        case Q4Version::Float4:kernel<3><<<grid,128,0,stream>>>(m,x,y,F);break;
-        case Q4Version::Pipeline:kernel<4><<<grid,128,0,stream>>>(m,x,y,F);break;
-    }
-    return cudaGetLastError();
+    void* args[]={const_cast<DeviceQ4*>(&m),&x,&y,&F};
+    return cudaLaunchKernel(p,dim3(count,F/128),dim3(128),args,0,stream);
 }
-cudaError_t q4Attributes(Q4Version v,ColumnKernelInfo* info) {
-    auto p=pointer(v);if(!p||!info)return cudaErrorInvalidValue;
+cudaError_t q4Attributes(Q4Config config,unsigned peak,ColumnKernelInfo* info) {
+    auto p=pointer(config,peak);if(!p||!info)return cudaErrorInvalidValue;
     cudaFuncAttributes a;auto e=cudaFuncGetAttributes(&a,p);if(e!=cudaSuccess)return e;
     info->registers=a.numRegs;info->sharedBytes=a.sharedSizeBytes;info->localBytes=a.localSizeBytes;
     return cudaOccupancyMaxActiveBlocksPerMultiprocessor(&info->activeBlocksPerSM,p,128,0);
+}
+// Preserve round-one API semantics (H32 and linear A layout).
+cudaError_t launchQ4(const DeviceQ4& m,const float* x,float* y,U f,Q4Version v,cudaStream_t stream,bool clear) {
+    return launchQ4(m,x,y,f,Q4Config{v,32,false},stream,clear);
+}
+cudaError_t q4Attributes(Q4Version v,ColumnKernelInfo* info) {
+    return q4Attributes(Q4Config{v,32,false},0,info);
 }

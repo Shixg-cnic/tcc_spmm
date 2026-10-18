@@ -30,11 +30,15 @@ void validate(const Q4Format& m,const Matrix& input) {
     std::vector<unsigned> seen(m.bitmap.size(),0);std::uint64_t P=0,U=0;
     for(auto task:m.tasks) {
         std::map<unsigned,unsigned> total,visits,slot;
+        unsigned peak=0;
         unsigned owner[32];std::fill(owner,owner+32,UINT32_MAX);
         for(auto o=task.begin;o<task.end;++o) for(unsigned r=0;r<8;++r) {
             auto row=m.tileRows[m.tileOrder[o]*8+r];if(row!=UINT32_MAX)++total[row];
         }
         U+=total.size();
+        std::uint64_t taskP=0;for(auto kv:total)taskP+=kv.second;
+        auto stats=m.taskStats.at(task.cw[0]/4);
+        require(stats.P==taskP&&stats.U==total.size(),"per-task P/U statistics");
         unsigned heads[4];for(unsigned c=0;c<task.count;++c)heads[c]=m.cwOffset[task.cw[c]];
         auto maxRow=[&](unsigned t){unsigned x=0;for(unsigned r=0;r<8;++r)if(m.tileRows[t*8+r]!=UINT32_MAX)x=m.tileRows[t*8+r];return x;};
         for(auto o=task.begin;o<task.end;++o) {
@@ -50,10 +54,13 @@ void validate(const Q4Format& m,const Matrix& input) {
                 if(prev) require(owner[s]==row&&slot[row]==s,"cache ownership");
                 else if(next){require(owner[s]==UINT32_MAX,"same-tile slot reuse");owner[s]=row;slot[row]=s;}
                 if(prev&&!next)release.push_back(s);
+                unsigned live=0;for(auto value:owner)live+=value!=UINT32_MAX;
+                peak=std::max(peak,live);
             }
             for(auto s:release)owner[s]=UINT32_MAX;
         }
         for(auto x:owner)require(x==UINT32_MAX,"unflushed row");
+        require(peak==stats.peakSlots,"per-task peak statistics");
     }
     for(auto n:seen)require(n==1,"missing tile");require(P==m.P&&U==m.U,"statistics");
 }
@@ -75,8 +82,13 @@ int main() {
             for(unsigned F:{128,256}) {
                 auto x=features(m.cols,F);auto expected=reference(input,x,F,true);
                 Buffer<float> dx(x),dy(std::size_t(m.rows)*F);
-                for(auto v:{Q4Version::Q1,Q4Version::Sync,Q4Version::Bits,Q4Version::Float4,Q4Version::Pipeline}) {
-                    check(launchQ4(gpu.view,dx.data,dy.data,F,v,stream));verify(error(dy.host(stream),expected));
+                for(auto v:{Q4Version::Q1,Q4Version::Sync,Q4Version::Bits,Q4Version::Float4,Q4Version::Pipeline,Q4Version::ScalarPipeline}) {
+                    for(unsigned h:{16u,24u,32u}) if(h>=m.peakSlots) for(bool xorA:{false,true}) {
+                        check(launchQ4(gpu.view,dx.data,dy.data,F,Q4Config{v,h,xorA},stream));
+                        verify(error(dy.host(stream),expected));
+                        ColumnKernelInfo info;check(q4Attributes(Q4Config{v,h,xorA},m.peakSlots,&info));
+                        if(v!=Q4Version::Q1) require(info.sharedBytes==h*132*4+(v==Q4Version::Pipeline||v==Q4Version::ScalarPipeline?512:256),"wrong H specialization");
+                    }
                 }
             }
         }
@@ -88,6 +100,68 @@ int main() {
             auto x=features(m.cols,128);Buffer<float> dx(x),dy(m.rows*128);
             check(launchQ4(gpu.view,dx.data,dy.data,128,Q4Version::Pipeline,stream));verify(error(dy.host(stream),reference(input,x,128,true)));
         }
-        check(cudaStreamDestroy(stream));std::cout<<"Q4 structure, lifetimes, deterministic grouping, fallback and all GPU variants passed\n";
+        // Enumerate actual logical shared addresses, not just bank indices.
+        for(bool xorA:{false,true}) {
+            std::set<unsigned> physical;
+            for(unsigned t=0;t<64;++t)physical.insert(xorA?t^((t>>3)&4):t);
+            require(physical.size()==64&&*physical.rbegin()==63,"A layout not bijective");
+            for(unsigned part=0;part<2;++part) {
+                std::map<unsigned,std::set<unsigned>> banks;
+                for(unsigned lane=0;lane<32;++lane) {
+                    unsigned g=lane/4,k=lane%4+4*part;
+                    unsigned address=8*g+(k^(xorA?(g&4):0));banks[address%32].insert(address);
+                }
+                require(banks.size()==(xorA?32:16),"A bank count");
+                for(auto bank:banks)require(bank.second.size()==(xorA?1:2),"A bank multiplicity");
+            }
+            for(unsigned warp=0;warp<2;++warp) {
+                std::set<unsigned> banks;
+                for(unsigned lane=0;lane<32;++lane){unsigned t=warp*32+lane; banks.insert((xorA?t^((t>>3)&4):t)%32);}
+                require(banks.size()==32,"staging bank conflict");
+            }
+        }
+        // Force live slots above 15/23 to catch accidental token & (H-1).
+        auto dense=makeMatrix(8,32,[](unsigned r,unsigned c){return float((r+c)%5+1)/7;});
+        for(unsigned shift:{16u,24u}) {
+            auto m=buildQ4(dense.rows,dense.cols,dense.csr,false);
+            require(m.peakSlots==8,"dense lifetime peak");
+            unsigned h24Slots[8]={0,1,2,3,8,9,16,17};
+            for(auto& token:m.rowToken)if(token&(Q4_PREV|Q4_NEXT))
+                token=(token&~31)|(shift==16?h24Slots[token&31]:(token&31)+shift);
+            m.peakSlots=shift+8;validateQ4Cache(m,q4CacheSlots(m.peakSlots));GPUQ4 gpu(m);
+            auto x=features(m.cols,256);Buffer<float> dx(x),dy(m.rows*256);auto expected=reference(dense,x,256,true);
+            for(auto v:{Q4Version::Bits,Q4Version::Pipeline,Q4Version::ScalarPipeline})for(bool xorA:{false,true}) {
+                check(launchQ4(gpu.view,dx.data,dy.data,256,Q4Config{v,0,xorA},stream));verify(error(dy.host(stream),expected));
+            }
+            require(launchQ4(gpu.view,dx.data,dy.data,256,Q4Config{Q4Version::Bits,16,false},stream)==cudaErrorInvalidValue,"undersized H accepted");
+            bool rejected=false;try{validateQ4Cache(m,16);}catch(const std::invalid_argument&){rejected=true;}require(rejected,"host H check");
+        }
+        // More than one 256-task bucket window, including a partial last window.
+        auto input=makeMatrix(41,9001,[](unsigned r,unsigned c){return (c*7+r*3)%23==0?0.17f:0.f;});
+        auto m=buildQ4(input.rows,input.cols,input.csr,true);auto original=m.tasks;
+        m.tasks=reorderQ4Tasks(original);auto again=reorderQ4Tasks(original);
+        require(m.tasks.size()==original.size(),"task count changed");
+        unsigned changed=0;
+        for(std::size_t b=0;b<original.size();b+=256) {
+            std::multiset<std::vector<unsigned>> before,after;
+            for(auto i=b;i<std::min(b+256,original.size());++i) {
+                auto key=[](Q4Task t){return std::vector<unsigned>{t.begin,t.end,t.cw[0],t.cw[1],t.cw[2],t.cw[3],t.count};};
+                before.insert(key(original[i]));after.insert(key(m.tasks[i]));
+                require(key(m.tasks[i])==key(again[i]),"task shuffle nondeterministic");
+                changed+=key(original[i])!=key(m.tasks[i]);
+                auto bucket=[](Q4Task t){unsigned n=t.end-t.begin;return n?32-__builtin_clz(n):0;};
+                require(bucket(original[i])==bucket(m.tasks[i]),"task workload bucket changed");
+            }
+            require(before==after,"task not moved intact/local");
+        }
+        require(changed>0,"task shuffle was identity");validate(m,input);
+        GPUQ4 gpu(m);
+        for(unsigned f:{128,256}) {
+            auto x=features(m.cols,f);Buffer<float> dx(x),dy(m.rows*f);auto expected=reference(input,x,f,true);
+            for(auto v:{Q4Version::Bits,Q4Version::Pipeline,Q4Version::ScalarPipeline}) {
+                check(launchQ4(gpu.view,dx.data,dy.data,f,Q4Config{v,0,true},stream));verify(error(dy.host(stream),expected));
+            }
+        }
+        check(cudaStreamDestroy(stream));std::cout<<"Q4 structure, lifetimes, deterministic grouping, fallback all H/layout/async/output variants, bank enumeration and task shuffle passed\n";
     }catch(const std::exception& e){std::cerr<<e.what()<<'\n';return 1;}
 }

@@ -133,6 +133,8 @@ Q4Format buildQ4(U rows,U cols,const CanonicalCSR& csr,bool grouped,std::uint64_
             U row=m.tileRows[std::size_t(m.tileOrder[o])*8+r];if(row!=UINT32_MAX) ++remaining[row];
         }
         m.U+=remaining.size();U occupied=0;
+        Q4TaskStats stats;stats.U=remaining.size();
+        for(auto kv:remaining) stats.P+=kv.second;
         for(U o=task.begin;o<task.end;++o) {
             U release=0;
             for(U r=0;r<8;++r) {
@@ -145,6 +147,7 @@ Q4Format buildQ4(U rows,U cols,const CanonicalCSR& csr,bool grouped,std::uint64_
                     if(occupied==UINT32_MAX) throw std::runtime_error("Q4 exceeds 32 live slots");
                     slot=__builtin_ctz(~occupied);occupied|=U(1)<<slot;active[row]=slot;
                     m.peakSlots=std::max(m.peakSlots,U(__builtin_popcount(occupied)));
+                    stats.peakSlots=std::max(stats.peakSlots,U(__builtin_popcount(occupied)));
                 }
                 m.rowToken.push_back(slot|(prev?Q4_PREV:0)|(next?Q4_NEXT:0));
                 if(prev&&!next) {release|=U(1)<<slot;active.erase(row);}
@@ -152,7 +155,48 @@ Q4Format buildQ4(U rows,U cols,const CanonicalCSR& csr,bool grouped,std::uint64_
             occupied&=~release; // Freed slots are reusable only in the next tile.
         }
         if(occupied||!active.empty()) throw std::runtime_error("Q4 unfinished lifetime");
-        m.tasks.push_back(task);
+        m.tasks.push_back(task);m.taskStats.push_back(stats);
     }
     m.planMs=ms(start);return m;
+}
+
+unsigned q4CacheSlots(unsigned peak,unsigned requested) {
+    if(peak>32 || (requested!=0&&requested!=16&&requested!=24&&requested!=32))
+        throw std::invalid_argument("invalid Q4 cache capacity");
+    unsigned h=requested?requested:peak<=16?16:peak<=24?24:32;
+    if(h<peak) throw std::invalid_argument("Q4 cache smaller than plan peak");
+    return h;
+}
+void validateQ4Cache(const Q4Format& m,unsigned h) {
+    h=q4CacheSlots(m.peakSlots,h);
+    for(unsigned token:m.rowToken) {
+        if(token&Q4_INVALID) {
+            if(token!=Q4_INVALID) throw std::invalid_argument("invalid Q4 padding token");
+        } else if(token&(Q4_PREV|Q4_NEXT)) {
+            // Token encoding stays five bits even for non-power-of-two H24.
+            if((token&31)>=h || (token&31)>=m.peakSlots)
+                throw std::invalid_argument("Q4 token exceeds cache/recorded peak");
+        }
+    }
+}
+std::vector<Q4Task> reorderQ4Tasks(const std::vector<Q4Task>& tasks,std::uint64_t seed) {
+    auto out=tasks;
+    for(std::size_t begin=0;begin<tasks.size();begin+=256) {
+        std::array<std::vector<std::size_t>,33> buckets;
+        for(std::size_t i=begin;i<std::min(begin+256,tasks.size());++i) {
+            if(tasks[i].end<tasks[i].begin) throw std::invalid_argument("Q4 task range");
+            U length=tasks[i].end-tasks[i].begin;
+            unsigned bucket=length?32-__builtin_clz(length):0;
+            buckets[bucket].push_back(i);
+        }
+        for(const auto& positions:buckets) {
+            auto ids=positions;
+            std::sort(ids.begin(),ids.end(),[&](auto a,auto b){
+                auto ha=hashRow(a^seed),hb=hashRow(b^seed);
+                return ha!=hb?ha<hb:a<b;
+            });
+            for(std::size_t j=0;j<ids.size();++j) out[positions[j]]=tasks[ids[j]];
+        }
+    }
+    return out;
 }

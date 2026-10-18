@@ -1,0 +1,50 @@
+[
+  {
+    "name": "cora",
+    "source": "https://raw.githubusercontent.com/kimiyoung/planetoid/master/data/ind.cora.graph",
+    "raw_sha256": "58f13302f39dde8852dad6fe6d15b89b077b6d7f837626bce671ef80344b383d",
+    "csr_sha256": "04d04a0aac1e4d149f14bca42c85180f99e7b22b363ab44e0dd23b81d42eea16",
+    "rows": 2708,
+    "cols": 2708,
+    "nnz": 10556,
+    "transform": "symmetric union, remove self loops, deduplicate, unit weights, sorted CSR"
+  },
+  {
+    "name": "pubmed",
+    "source": "https://raw.githubusercontent.com/kimiyoung/planetoid/master/data/ind.pubmed.graph",
+    "raw_sha256": "5b89f0036ca22909471f1e6558eb42fa06e0c730a577bde5b058b40638f81dc9",
+    "csr_sha256": "a27060c7b21a21618ebfd985a86aff0a534d2dbb436aba420c6abfb32bb9f7ae",
+    "rows": 19717,
+    "cols": 19717,
+    "nnz": 88648,
+    "transform": "symmetric union, remove self loops, deduplicate, unit weights, sorted CSR"
+  },
+  {
+    "name": "dblp",
+    "source": "https://raw.githubusercontent.com/abojchevski/graph2gauss/master/data/dblp.npz",
+    "raw_sha256": "46da600a15c0680d967b3c9ac83979e3c44dfe5a0ef86e1c42a94d8dee1c1da4",
+    "csr_sha256": "8b6a8224b6eeb9962c688a17b9e9aa22dd8aa6505d8eaf8adb1d1499de46c721",
+    "rows": 17716,
+    "cols": 17716,
+    "nnz": 105734,
+    "transform": "symmetric union, remove self loops, deduplicate, unit weights, sorted CSR"
+  },
+  {
+    "name": "ogbn-arxiv",
+    "source": "existing project full CSR, unchanged",
+    "csr_sha256": "d57681465ebbe224e19095ffc47fedd3aa5ba9abe4d664b3ea13757e3db20211",
+    "rows": 169343,
+    "cols": 169343,
+    "nnz": 2484941,
+    "transform": "no changes in this experiment"
+  },
+  {
+    "name": "ogbn-products",
+    "source": "existing project full CSR, unchanged",
+    "csr_sha256": "f585a103d6d1bf3adc4a37f248d4f09fee45ba297e1621b853fe860760890029",
+    "rows": 2449029,
+    "cols": 2449029,
+    "nnz": 126167053,
+    "transform": "no changes in this experiment"
+  }
+]

@@ -1,0 +1,19 @@
+building grouped format
+verified Acc H=0 regs=44 shared=576 blocks=5
+verified Q4_float4_H32 H=32 regs=64 shared=17152 blocks=5
+verified Q4_float4_pipeline_H32 H=32 regs=64 shared=17408 blocks=5
+completed interleaved round 0
+completed interleaved round 1
+completed interleaved round 2
+completed interleaved round 3
+completed interleaved round 4
+completed interleaved round 5
+completed interleaved round 6
+completed interleaved round 7
+completed interleaved round 8
+completed interleaved round 9
+completed interleaved round 10
+completed interleaved round 11
+completed interleaved round 12
+completed interleaved round 13
+completed interleaved round 14

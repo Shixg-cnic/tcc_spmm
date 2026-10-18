@@ -1,0 +1,3 @@
+10 dataset/F combinations: full-output Q4 vs Acc and sampled CSR checks passed.
+450 timed samples: order files match CSV samples; medians verified.
+Matched grouped structure across variants and F; SW sums equal T/P/U.

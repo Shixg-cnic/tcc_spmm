@@ -161,3 +161,8 @@ target_include_directories(tac_bcsr_repro PRIVATE tests include)
 target_compile_options(tac_bcsr_repro PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-O3>)
 target_link_libraries(tac_bcsr_repro PRIVATE CUDA::cudart)
 add_test(NAME tac_bcsr_correctness COMMAND tac_bcsr_repro --test)
+
+add_executable(benchmark_q4_datasets bench/benchmark_q4_datasets.cu tests/acc_reference.cu)
+target_include_directories(benchmark_q4_datasets PRIVATE tests ${CUSPARSE_INCLUDE_DIR} ${CUBLAS_INCLUDE_DIR})
+target_compile_options(benchmark_q4_datasets PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-O3>)
+target_link_libraries(benchmark_q4_datasets PRIVATE tcc_spmm)

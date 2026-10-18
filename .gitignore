@@ -8,3 +8,6 @@
 *.bin
 __pycache__/
 *.pyc
+
+# Local TAC source archive; source files are tracked under TAC_src/.
+/TAC_src.tar.gz

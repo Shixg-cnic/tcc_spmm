@@ -1,0 +1,7 @@
+#include "config.h"
+#include "class.h"
+#include "module.h"
+#include "ptx_tf32.h"
+#include "spmm_dispatcher.h"
+#include "spmm_kernel.h"
+#include "spmm_launcher.h"

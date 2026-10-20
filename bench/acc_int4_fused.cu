@@ -3,7 +3,7 @@
 #include "csr.cuh"
 #include "row_format.cuh"
 // Fused INT4 X load: given the linear FP32 index idx = row*features+col,
-// read the packed nibble and dequantise q*scale[col].
+// read the packed nibble and dequantise q*scale[row].
 __device__ __forceinline__ float int4X(const std::uint8_t* q, const float* scale,
     vint features, std::size_t idx) {
     vint row = vint(idx / features), col = vint(idx % features);

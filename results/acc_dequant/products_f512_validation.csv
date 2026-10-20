@@ -1,0 +1,10 @@
+method,pass,sampled_relative_l2,sampled_max_abs,sampled_bad,full_vs_xhat_bad
+Acc_original_X,0,8.765585389e-08,0.0002183914185,0,0
+Acc_original_Xhat,0,4.386224471e-09,1.14440918e-05,0,0
+Acc_INT4_fused,0,4.386224471e-09,1.14440918e-05,0,0
+Acc_original_X,1,8.765585389e-08,0.0002183914185,0,0
+Acc_original_Xhat,1,4.386224471e-09,1.14440918e-05,0,0
+Acc_INT4_fused,1,4.386224471e-09,1.14440918e-05,0,0
+Acc_original_X,2,8.765585389e-08,0.0002183914185,0,0
+Acc_original_Xhat,2,4.386224471e-09,1.14440918e-05,0,0
+Acc_INT4_fused,2,4.386224471e-09,1.14440918e-05,0,0

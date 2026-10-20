@@ -1,0 +1,10 @@
+method,pass,sampled_relative_l2,sampled_max_abs,sampled_bad,full_vs_xhat_bad
+Acc_original_X,0,2.204149084e-08,7.152557373e-06,0,0
+Acc_original_Xhat,0,0,0,0,0
+Acc_INT4_fused,0,0,0,0,0
+Acc_original_X,1,2.204149084e-08,7.152557373e-06,0,0
+Acc_original_Xhat,1,0,0,0,0
+Acc_INT4_fused,1,0,0,0,0
+Acc_original_X,2,2.204149084e-08,7.152557373e-06,0,0
+Acc_original_Xhat,2,0,0,0,0
+Acc_INT4_fused,2,0,0,0,0

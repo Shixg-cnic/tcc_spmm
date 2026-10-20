@@ -1,0 +1,2 @@
+nodes,nnz,F,tc_blocks,quant_output_relative_l2,quant_output_max_abs
+2449029,126167053,128,15896497,0.04308325393,26.01018333

@@ -7,9 +7,11 @@
 # The third_party file is NOT modified; tests/acc_reference.cu is not linked
 # into this target (common.hpp's host helpers are compiled exactly once here).
 import re, os
+from pathlib import Path
 
-SRC = "/home/shixingguo/work/GNN/tcc_spmm/third_party/Acc-SpMM/include/mma_tf32.cuh"
-OUT = "/home/shixingguo/work/GNN/tcc_spmm/bench/acc_int4_fused.cu"
+ROOT = Path(__file__).resolve().parents[1]
+SRC = ROOT / "third_party/Acc-SpMM/include/mma_tf32.cuh"
+OUT = ROOT / "bench/acc_int4_fused.cu"
 
 src = open(SRC).read()
 
@@ -29,12 +31,13 @@ ts = ts[:msig.start()] + ("const std::uint8_t* __restrict__ d_q,\n"
     "    const float*         __restrict__ d_scale, ") + ts[msig.end():]
 n = ts.count("load_fp32_from_global(d_MatB + ")
 ts = ts.replace("load_fp32_from_global(d_MatB + ", "int4X(d_q, d_scale, feature_dim, ")
+assert n == 24, f"unexpected X load count: {n}"
 print("replaced X load sites:", n)
 
 # ---- assemble: includes + int4X + INT4 kernel + FP32 kernel + launchers ----
 out = ('#include "format.hpp"\n#include "int4_format.cuh"\n#include "csr.cuh"\n#include "row_format.cuh"\n'
        '// Fused INT4 X load: given the linear FP32 index idx = row*features+col,\n'
-       '// read the packed nibble and dequantise q*scale[col].\n'
+       '// read the packed nibble and dequantise q*scale[row].\n'
        '__device__ __forceinline__ float int4X(const std::uint8_t* q, const float* scale,\n'
        '    vint features, std::size_t idx) {\n'
        '    vint row = vint(idx / features), col = vint(idx % features);\n'

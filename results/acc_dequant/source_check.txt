@@ -1,0 +1,3 @@
+PASS: original first kernel text retained verbatim.
+PASS: all 24 X load sites replaced in the INT4 copy.
+No synchronization or MMA changes introduced.

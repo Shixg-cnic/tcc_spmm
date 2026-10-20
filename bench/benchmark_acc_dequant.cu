@@ -3,6 +3,13 @@
 #include "acc_reference.cuh"
 #include "int4_format.cuh"
 #include <array>
+#if __has_include(<cuda_profiler_api.h>)
+#include <cuda_profiler_api.h>
+#else
+// The Conda runtime exports these APIs but omits the optional profiler header.
+extern "C" cudaError_t CUDARTAPI cudaProfilerStart(void);
+extern "C" cudaError_t CUDARTAPI cudaProfilerStop(void);
+#endif
 #include <iomanip>
 #include <numeric>
 using namespace test;
@@ -35,10 +42,12 @@ __global__ void compare(const float* a,const float* b,std::size_t n,unsigned lon
     if(count)atomicAdd(bad,(unsigned long long)count);
 }
 int main(int argc,char** argv) {try {
-    require(argc==6,"usage: benchmark_acc_dequant matrix.csr X.bin F device output_prefix");
+    require(argc==6||argc==7,"usage: benchmark_acc_dequant matrix.csr X.bin F device output_prefix [profile_method=0|2]");
+    int profileMethod=argc==7?std::stoi(argv[6]):-1;
+    require(argc==6||profileMethod==0||profileMethod==2,"profile method must be 0 (original X) or 2 (INT4)");
     U F=std::stoul(argv[3]);require(F==128||F==256||F==512,"F must be 128/256/512");
     check(cudaSetDevice(std::stoi(argv[4])));cudaStream_t stream;check(cudaStreamCreateWithFlags(&stream,cudaStreamNonBlocking));
-    auto m=readMatrix(argv[1]);auto x=readFeatures(argv[2],m.cols,F);
+    auto m=readMatrix(argv[1]);require(m.rows==m.cols,"this GNN benchmark requires square adjacency");auto x=readFeatures(argv[2],m.cols,F);
     auto acc=convertAccRow(m.rows,m.cols,m.csr);
     for(std::size_t i=1;i<acc.rowWindowOffset.size();++i)
         require(acc.rowWindowOffset[i]>acc.rowWindowOffset[i-1],"original Acc requires nonempty row windows");
@@ -47,6 +56,22 @@ int main(int argc,char** argv) {try {
     Buffer<std::uint8_t> q(std::size_t(m.cols)*F/2);
     check(quantizeXInt4(dx.data,q.data,scale.data,m.cols,F,stream));
     check(dequantizeXInt4(q.data,scale.data,xh.data,m.cols,F,stream));
+    std::array<std::string,3> names{"Acc_original_X","Acc_original_Xhat","Acc_INT4_fused"};
+    auto launch=[&](unsigned method,float* out){
+        if(method==2)check(launchAccRowInt4SpMM(da.window.data,da.offset.data,da.mapping.data,da.bits.data,da.values.data,q.data,scale.data,out,padded,m.cols,F,stream));
+        else check(launchAccRowSpMM(da.window.data,da.offset.data,da.mapping.data,da.bits.data,da.values.data,method==0?dx.data:xh.data,out,padded,m.cols,F,stream));
+    };
+    // Profile exactly one target SpMM; exclude setup/quantization and warmup.
+    if(profileMethod>=0) {
+        for(int i=0;i<10;++i)launch(profileMethod,y.data);
+        check(cudaStreamSynchronize(stream));
+        check(cudaProfilerStart());
+        launch(profileMethod,y.data);
+        check(cudaStreamSynchronize(stream));
+        check(cudaProfilerStop());
+        std::cout<<"Profiled "<<names[profileMethod]<<" F="<<F<<" nodes="<<m.rows<<'\n';
+        check(cudaStreamDestroy(stream));return 0;
+    }
     auto xhat=xh.host(stream);
     // Verify unpack/scale against an independent CPU quantizer, not just GPU round trip.
     auto packed=q.host(stream);auto scales=scale.host(stream);
@@ -60,11 +85,6 @@ int main(int argc,char** argv) {try {
         }
     }
     packed.clear();packed.shrink_to_fit();
-    std::array<std::string,3> names{"Acc_original_X","Acc_original_Xhat","Acc_INT4_fused"};
-    auto launch=[&](unsigned method,float* out){
-        if(method==2)check(launchAccRowInt4SpMM(da.window.data,da.offset.data,da.mapping.data,da.bits.data,da.values.data,q.data,scale.data,out,padded,m.cols,F,stream));
-        else check(launchAccRowSpMM(da.window.data,da.offset.data,da.mapping.data,da.bits.data,da.values.data,method==0?dx.data:xh.data,out,padded,m.cols,F,stream));
-    };
     std::string prefix=argv[5];std::ofstream validation(prefix+"_validation.csv");
     validation<<"method,pass,sampled_relative_l2,sampled_max_abs,sampled_bad,full_vs_xhat_bad\n"<<std::setprecision(10);
     Buffer<unsigned long long> bad(1);

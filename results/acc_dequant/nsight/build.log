@@ -1,0 +1,4 @@
+[ 81%] Built target tcc_spmm
+[ 87%] Building CUDA object CMakeFiles/benchmark_acc_dequant.dir/bench/benchmark_acc_dequant.cu.o
+[ 93%] Linking CXX executable benchmark_acc_dequant
+[100%] Built target benchmark_acc_dequant

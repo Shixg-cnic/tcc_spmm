@@ -176,5 +176,5 @@ add_test(NAME native_features_correctness COMMAND benchmark_native_features --te
 # Isolated original Acc / per-TC-block X INT4 dequantization experiment.
 add_executable(benchmark_acc_dequant bench/benchmark_acc_dequant.cu bench/acc_int4_fused.cu)
 target_include_directories(benchmark_acc_dequant PRIVATE tests ${CUSPARSE_INCLUDE_DIR} ${CUBLAS_INCLUDE_DIR} third_party/Acc-SpMM/include)
-target_compile_options(benchmark_acc_dequant PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-O3>)
+target_compile_options(benchmark_acc_dequant PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-O3;-lineinfo>)
 target_link_libraries(benchmark_acc_dequant PRIVATE tcc_spmm)

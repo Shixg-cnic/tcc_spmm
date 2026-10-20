@@ -1,0 +1,5 @@
+==WARNING== Note: Running with unmodified GPU clocks. If not controlled otherwise, profiling results may be inconsistent.
+==PROF== Connected to process 813370 (/home/shixingguo/work/GNN/tcc_spmm/build/benchmark_acc_dequant)
+==ERROR== ERR_NVGPUCTRPERM - The user does not have permission to access NVIDIA GPU Performance Counters on the target device 0. For instructions on enabling permissions and to get more information see https://developer.nvidia.com/ERR_NVGPUCTRPERM
+Profiled Acc_original_X F=128 nodes=169343
+==PROF== Disconnected from process 813370

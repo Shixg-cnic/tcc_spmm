@@ -1,0 +1,53 @@
+[
+  {
+    "name": "ogbn-arxiv",
+    "shape": [
+      169343,
+      169343
+    ],
+    "nnz": 2484941,
+    "bins": [
+      768,
+      768
+    ],
+    "sum": 2484941,
+    "max_bin": 261,
+    "vmin": 1,
+    "vmax": 27608,
+    "source": "data/ogbn_arxiv_full.csr"
+  },
+  {
+    "name": "ogbn-products",
+    "shape": [
+      2449029,
+      2449029
+    ],
+    "nnz": 126167053,
+    "bins": [
+      768,
+      768
+    ],
+    "sum": 126167053,
+    "max_bin": 6375,
+    "vmin": 1,
+    "vmax": 27608,
+    "source": "data/ogbn_products_full.csr"
+  },
+  {
+    "name": "ogbn-proteins",
+    "shape": [
+      132534,
+      132534
+    ],
+    "nnz": 79255038,
+    "bins": [
+      768,
+      768
+    ],
+    "sum": 79255038,
+    "max_bin": 27608,
+    "vmin": 1,
+    "vmax": 27608,
+    "source": "data/ogb_extended/ogbn-proteins.csr"
+  }
+]

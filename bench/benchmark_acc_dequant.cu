@@ -45,7 +45,7 @@ int main(int argc,char** argv) {try {
     require(argc==6||argc==7,"usage: benchmark_acc_dequant matrix.csr X.bin F device output_prefix [profile_method=0|2]");
     int profileMethod=argc==7?std::stoi(argv[6]):-1;
     require(argc==6||profileMethod==0||profileMethod==2,"profile method must be 0 (original X) or 2 (INT4)");
-    U F=std::stoul(argv[3]);require(F==128||F==256||F==512,"F must be 128/256/512");
+    U F=std::stoul(argv[3]);require(F==64||F==128||F==256||F==512,"F must be 64/128/256/512");
     check(cudaSetDevice(std::stoi(argv[4])));cudaStream_t stream;check(cudaStreamCreateWithFlags(&stream,cudaStreamNonBlocking));
     auto m=readMatrix(argv[1]);require(m.rows==m.cols,"this GNN benchmark requires square adjacency");auto x=readFeatures(argv[2],m.cols,F);
     auto acc=convertAccRow(m.rows,m.cols,m.csr);

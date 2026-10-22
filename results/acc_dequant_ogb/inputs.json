@@ -1,0 +1,41 @@
+[
+  {
+    "name": "ogbn-arxiv",
+    "nodes": 169343,
+    "nnz": 2484941,
+    "native_F": 128,
+    "csr": "data/ogbn_arxiv_full.csr",
+    "x": "data/native_features/ogbn-arxiv.x.bin",
+    "graph_policy": "Reuse earlier symmetric/self-loop CSR without changes; no node reordering",
+    "feature_policy": "Original node feature values; first F columns if F<native_F, cyclic repeat otherwise",
+    "csr_sha256": "d57681465ebbe224e19095ffc47fedd3aa5ba9abe4d664b3ea13757e3db20211",
+    "x_sha256": "40adbe7fe3b8762a41a4a061dd3709434867fb80c81800038d4300eb17a62a9c"
+  },
+  {
+    "name": "ogbn-products",
+    "nodes": 2449029,
+    "nnz": 126167053,
+    "native_F": 100,
+    "csr": "data/ogbn_products_full.csr",
+    "x": "data/native_features/ogbn-products.x.bin",
+    "graph_policy": "Reuse earlier symmetric/self-loop CSR without changes; no node reordering",
+    "feature_policy": "Original node feature values; first F columns if F<native_F, cyclic repeat otherwise",
+    "csr_sha256": "f585a103d6d1bf3adc4a37f248d4f09fee45ba297e1621b853fe860760890029",
+    "x_sha256": "54777dee8316e45d68a2cc23981c1ca9df02cb6a3219b8b3c99ef42586b4d332"
+  },
+  {
+    "name": "ogbn-proteins",
+    "nodes": 132534,
+    "raw_undirected_edges": 39561252,
+    "nnz": 79255038,
+    "native_F": 8,
+    "csr": "data/ogb_extended/ogbn-proteins.csr",
+    "x": "data/ogb_extended/ogbn-proteins.x.bin",
+    "graph_policy": "Undirected union, deduplicate, add unit self-loops, all A values=1; no node reordering",
+    "feature_policy": "Derived, NOT provided native node features: 8D mean of incident edge features; duplicate both directions before mean, so raw self-edges count twice; isolated nodes zero; cyclic repeat to F",
+    "source": "https://snap.stanford.edu/ogb/data/nodeproppred/proteins.zip",
+    "archive_sha256": "1cd3113dc2a6f0c87a549332b77d78be45cf99804c254c18d9c72029164a0859",
+    "csr_sha256": "4a3bc57eeb7bb81e28b6839cb8599e69799dac982d285bde93be8448aeee056e",
+    "x_sha256": "d297bf43de6bc27baaa3f3c50e7cdb7cbfdba63626ad951537012b89a54e8d8d"
+  }
+]

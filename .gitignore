@@ -1,10 +1,13 @@
-/build*/
+/.build/
+/build/
+/build-*/
 /data/
-/third_party/Acc-SpMM/dataset/
-
+/dataset/
 *.o
 *.a
 *.so
 *.bin
+*.ncu-rep
+*.nsys-rep
 __pycache__/
 *.pyc

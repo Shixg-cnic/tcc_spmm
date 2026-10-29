@@ -1,4 +1,0 @@
-# layout rows=2449029 pairs=126101435 partial_bytes=8.07049GB
-correctness: rmse=1.74169e-07 maxAbs=0.0147876 maxRef=16973.9 -> OK
-dataset,M,K,nnz,F,scheme,kernel_ms,min,max,partial_gb
-../data/ogbn_products_full.csr,2449029,2449029,126167053,128,partial_reduce_fb16,249.702682,249.595627,249.845917,8.07049184

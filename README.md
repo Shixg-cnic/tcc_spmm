@@ -32,22 +32,34 @@ GPU 1 / RTX 5090 的运行时资源查询：F128/F256 均为每线程 64 registe
 
 ## 构建与运行
 
-需要 CMake 3.18+、支持 C++17 的编译器和 CUDA Toolkit。当前 kernel 使用 TF32 Tensor Core 和 `cp.async`，要求 Ampere 或更新架构（SM80+）。RTX 5090 的 SM120 编译需要 CUDA 12.8 或更新版本。
+需要 CMake 3.18+、支持 C++17 的编译器和 CUDA Toolkit。当前 kernel 使用 TF32 Tensor Core 和 `cp.async`，要求 Ampere 或更新架构（SM80+）。默认编译目标为 SM80，适用于 A100 / A800，CUDA 12.2 可以编译。RTX 5090 应显式指定 SM120，并使用 CUDA 12.8 或更新版本。
 
-在另一台服务器上，从 GitHub 拉取源码并重新编译。以下命令适用于 RTX 5090；先让 `nvcc` 位于 `PATH` 中：
+在另一台服务器上，从 GitHub 拉取源码并重新编译。下面命令适用于 A100 / A800；先让 `nvcc` 位于 `PATH` 中：
 
 ```bash
 git clone https://github.com/Shixg-cnic/tcc_spmm.git
 cd tcc_spmm
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_CUDA_COMPILER="$(command -v nvcc)" \
-  -DCMAKE_CUDA_ARCHITECTURES=120
+  -DCMAKE_CUDA_ARCHITECTURES=80
 cmake --build build -j4
 ./build/tcc_spmm_run /path/to/ogbn_products_rabbit_rows.mtx 128 0
 ./build/tcc_spmm_run /path/to/ogbn_products_rabbit_rows.mtx 256 0
 ```
 
-其他 GPU 将 `CMAKE_CUDA_ARCHITECTURES` 改为对应数值，并使用支持该架构的 CUDA Toolkit：A100 为 `80`，RTX 3090 / A6000 为 `86`，RTX 4090 / L40S 为 `89`，H100 / H200 为 `90`。更换 CUDA 编译器或 GPU 架构时，使用新的构建目录，例如 `-B build-a100`。
+其他 GPU 应显式指定 `CMAKE_CUDA_ARCHITECTURES`：A100 / A800 为 `80`，RTX 3090 / A6000 为 `86`，RTX 4090 / L40S 为 `89`，H100 / H200 为 `90`，RTX 5090 为 `120`。使用支持目标架构的 CUDA Toolkit；显式指定架构也支持在没有可见 GPU 的节点上编译。
+
+A800 + CUDA 12.2 示例：
+
+```bash
+cmake -S . -B build-a800 -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_CUDA_COMPILER=/usr/local/cuda-12.2/bin/nvcc \
+  -DCMAKE_CUDA_ARCHITECTURES=80
+cmake --build build-a800 -j4
+./build-a800/tcc_spmm_run /path/to/matrix.mtx 128 0
+```
+
+从旧版更新时，已有构建目录可能仍缓存 `120`，需用 `-DCMAKE_CUDA_ARCHITECTURES=80`（A800）覆盖缓存；更换 CUDA 编译器时使用新的构建目录。架构选项说明见 [CMake 文档](https://cmake.org/cmake/help/latest/prop_tgt/CUDA_ARCHITECTURES.html)。
 
 仓库包含完整源码和编译配置，不包含数据集、已编译程序或性能分析文件。将 `.mtx` 单独传到新服务器，并在运行命令中填写实际路径；不需要旧服务器的目录结构或其他 baseline 项目。
 

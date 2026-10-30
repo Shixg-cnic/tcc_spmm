@@ -6,9 +6,8 @@
 
 // Physical bucket order: four exclusive RWs, followed by shared source panels.
 // Slot zero is empty in the bucketed format.
-inline constexpr unsigned sw32BucketOrder[16] = {
-    0, 1, 2, 4, 8, 3, 5, 6, 7, 9, 10, 11, 12, 13, 14, 15
-};
+inline constexpr unsigned sw32BucketOrder[16] = {0, 1, 2,  4,  8,  3,  5,  6,
+                                                 7, 9, 10, 11, 12, 13, 14, 15};
 
 inline constexpr std::uint32_t sw32TaskPanelLimit = 384;
 struct Sw32Task {
@@ -41,8 +40,8 @@ struct Sw32HostFormat {
 
 // CPU conversion only. Rows and source IDs follow the input matrix.
 // Keep bucketByRwMask=true for launchSpmmInt8().
-Sw32HostFormat convertCsrToSw32(std::uint32_t rows, std::uint32_t cols,
-    const CsrMatrix& csr, bool bucketByRwMask = true);
+Sw32HostFormat convertCsrToSw32(std::uint32_t rows, std::uint32_t cols, const CsrMatrix& csr,
+                                bool bucketByRwMask = true);
 
 // Non-owning GPU pointers to the corresponding arrays above; upload is explicit.
 struct Sw32DeviceView {
@@ -55,4 +54,3 @@ struct Sw32DeviceView {
     const std::uint32_t* partialIds = nullptr;
     std::uint32_t taskCount = 0;
 };
-

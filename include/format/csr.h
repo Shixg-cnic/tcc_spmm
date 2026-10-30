@@ -21,5 +21,5 @@ MtxMatrix loadMatrixMarket(const std::string& path);
 // source column, coalesce duplicate coordinates, drop zero-sum entries and
 // reject non-finite weights or invalid offsets.
 CsrMatrix makeCanonicalCsr(std::uint32_t rows, std::uint32_t cols, std::uint32_t nnz,
-    const std::uint32_t* rowOffsets, const std::uint32_t* sourceIds, const float* values);
-
+                           const std::uint32_t* rowOffsets, const std::uint32_t* sourceIds,
+                           const float* values);

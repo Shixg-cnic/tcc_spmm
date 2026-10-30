@@ -28,7 +28,7 @@ else:
         按固定顺序归并部分和，写回 global Y
 ```
 
-GPU 1 / RTX 5090 的运行时资源查询：F128/F256 均为每线程 64 registers、每 CTA 4624 B shared、0 B local memory、理论最多 8 CTA/SM。每线程仍保存 32 个 FP32 累加值。
+此前 GPU 1 / RTX 5090 的运行时资源查询记录：F128/F256 均为每线程 64 registers、每 CTA 4624 B shared、0 B local memory、理论最多 8 CTA/SM。每线程仍保存 32 个 FP32 累加值。
 
 ## 构建与运行
 
@@ -72,6 +72,16 @@ cmake --build build-a800 -j4
 - `partials`：`Sw32HostFormat::partialCount * 8 * features` 个 float，无需初始化。
 - `counters`：`ceil(rows/32) * (features/128)` 个 uint32，首次使用前清零；同 stream 顺序调用时可直接复用。
 - `partialCount == 0` 时两者可为空。并发调用需使用独立 workspace；所有缓冲区保留到 stream 执行完成。
+
+## 源码组织与接口
+
+从 `src/main.cu` 的 `run()` 开始阅读，完整顺序为：矩阵读取与 SW32 转换 → 上传矩阵和任务 → 准备 INT8 特征 → 计时启动。矩阵与 workspace 的设备内存归 `src/device_matrix.cuh` 管理；任务生成单独放在 `buildPanelTasks()`；kernel 内按加载计算、写回、归并分段。详细阅读顺序见 [src/README.md](src/README.md)。
+
+CUDA 错误统一由 `checkCuda()` 抛出异常。`launchSpmmInt8()`、`quantizeFeaturesInt8()` 和 `packFeaturesInt8x16()` 现在返回 `void`；调用方应直接调用，旧的 `check(launchSpmmInt8(...))` 改为 `launchSpmmInt8(...)`。启动仍是异步的，没有加入每次调用后的设备同步。特征准备接口只供非零、有效尺寸使用，packed16 要求特征维度为 16 的倍数；SpMM 支持 128/256。调用方负责缓冲区大小和生命周期。
+
+未使用的 `kernel_info.cuh`、资源/占用率查询接口和独立反量化接口已删除；融合 kernel 中的反量化保留。`cudaOccupancyMaxActiveBlocksPerMultiprocessor` 原本只是估算每个 SM 能同时驻留多少个 CTA，不负责负载均衡或启动调度。
+
+2026-10-30 重构验证：同一 CUDA 12.8 编译器、Release 配置，分别生成 SM80 和 SM120。F128/F256 SpMM、量化和打包 kernel 的机器指令及调度编码与重构前一致，寄存器、共享内存和 local memory 资源记录一致；41 个 CPU 格式案例生成的所有格式数组、任务及归并描述逐字节一致。由于测试服务器 CUDA 驱动初始化返回 999，此次未重新执行 GPU 正确性和耗时测试；下列数据是重构前的历史结果。
 
 ## 验证与性能
 

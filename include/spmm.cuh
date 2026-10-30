@@ -13,10 +13,11 @@ struct SpmmWorkspace {
 };
 
 // F128/F256 fused INT8 dequantization + SpMM, including partial reduction.
-// q is packed16, scale is per source, y is FP32. The default RW-bucketed
+// packedX is packed16, scales are per source, output is FP32. The default RW-bucketed
 // SW32 format includes the bounded task plan; upload all its arrays.
+// Callers supply valid device views and appropriately sized buffers.
+// CUDA launch failures throw std::runtime_error; execution remains asynchronous.
 // Every output is overwritten. Counters return to zero after each launch.
-cudaError_t launchSpmmInt8(Sw32DeviceView format,
-    const std::int8_t* qPacked16, const float* scale, float* y,
-    std::uint32_t rows, std::uint32_t cols, std::uint32_t features,
-    SpmmWorkspace workspace, cudaStream_t stream = nullptr);
+void launchSpmmInt8(Sw32DeviceView matrix, const std::int8_t* packedX, const float* scales,
+                    float* output, std::uint32_t rows, std::uint32_t cols, std::uint32_t features,
+                    SpmmWorkspace workspace, cudaStream_t stream = nullptr);
